@@ -5,6 +5,26 @@ import Logo from '../../components/ui/Logo'
 
 const CATEGORIES = ['Todos', 'Corte', 'Color', 'Tratamientos', 'Otros']
 
+// ── Lazy image: carga nativa + skeleton + fade-in ────────────────────────────
+function LazyImage({ src, alt, className, eager = false }) {
+  const [loaded, setLoaded] = useState(false)
+
+  return (
+    <div className="relative">
+      {/* Skeleton — desaparece al cargar */}
+      <div className={`absolute inset-0 bg-dark-100 transition-opacity duration-300 pointer-events-none ${loaded ? 'opacity-0' : 'animate-pulse'}`} />
+      <img
+        src={src}
+        alt={alt}
+        loading={eager ? 'eager' : 'lazy'}
+        decoding="async"
+        className={`${className} transition-opacity duration-500 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+        onLoad={() => setLoaded(true)}
+      />
+    </div>
+  )
+}
+
 // ── Lightbox ──────────────────────────────────────────────────────────────────
 function Lightbox({ photos, index, onClose, onPrev, onNext }) {
   if (index === null) return null
@@ -134,11 +154,11 @@ export default function GaleriaPublico() {
               <div key={photo.id} className="break-inside-avoid group cursor-pointer"
                 onClick={() => setLightbox(i)}>
                 <div className="relative rounded-2xl overflow-hidden bg-dark-100">
-                  <img
+                  <LazyImage
                     src={photo.url}
                     alt={photo.title}
+                    eager={i < 8}
                     className="w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    loading="lazy"
                   />
                   {/* Hover overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">

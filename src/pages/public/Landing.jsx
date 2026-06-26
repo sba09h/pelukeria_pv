@@ -313,32 +313,32 @@ function ServicesSection({ navigate }) {
 }
 
 // Portfolio photos (from /public/portafolio/)
-const PORTFOLIO_PHOTOS = [
-  '491445162_17871415572345251_368358495502043921_n.webp',
-  '491899885_17871415590345251_8944960919762388264_n.webp',
-  '502018196_17875982268345251_4081439649387061853_n.webp',
-  '524702296_17883322164345251_7572641808358478543_n.webp',
-  '538166651_17886691155345251_8361318768342532532_n_5_11zon.webp',
-  '539394048_18149462677400511_5053722861017725537_n_6_11zon.webp',
-  '547783918_17889233850345251_1500390999692302985_n_10_11zon.webp',
-  '548836459_17889702885345251_1329868695909128978_n_1_11zon.webp',
-  '626296687_17906323050345251_4500384965311275525_n_7_11zon.webp',
-  '671260714_17917408578345251_2391417951895553459_n_6_11zon.webp',
-  'foto1_18_11zon.webp',
-].map(f => `/portafolio/${f}`)
+const PORTFOLIO_PHOTOS = Array.from({ length: 15 }, (_, i) =>
+  `/portafolio/lpk_portfolio_${String(i + 1).padStart(2, '0')}.webp`
+)
 
 const SLOTS = 6 // visible grid cells
+
+function shuffleArray(arr) {
+  const a = [...arr]
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]]
+  }
+  return a
+}
 
 // ── Gallery Section ───────────────────────────────────────────────────────────
 function GallerySection({ navigate }) {
   const [visible,  setVisible]  = useState(false)
   const [hov,      setHov]      = useState(null)
-  const [page,     setPage]     = useState(0)        // which "page" of 6 we show
-  const [fading,   setFading]   = useState(false)    // cross-fade trigger
+  const [page,     setPage]     = useState(0)
+  const [fading,   setFading]   = useState(false)
   const [paused,   setPaused]   = useState(false)
+  const [photos,   setPhotos]   = useState(() => shuffleArray(PORTFOLIO_PHOTOS))
   const ref = useRef(null)
 
-  const totalPages = Math.ceil(PORTFOLIO_PHOTOS.length / SLOTS)
+  const totalPages = Math.ceil(photos.length / SLOTS)
 
   // Scroll-reveal
   useEffect(() => {
@@ -371,10 +371,10 @@ function GallerySection({ navigate }) {
   })
 
   // Current 6 photos (pad with first ones if last page is short)
-  const start  = page * SLOTS
-  const slice  = PORTFOLIO_PHOTOS.slice(start, start + SLOTS)
-  const photos = slice.length < SLOTS
-    ? [...slice, ...PORTFOLIO_PHOTOS.slice(0, SLOTS - slice.length)]
+  const start = page * SLOTS
+  const slice = photos.slice(start, start + SLOTS)
+  const visible6 = slice.length < SLOTS
+    ? [...slice, ...photos.slice(0, SLOTS - slice.length)]
     : slice
 
   return (
@@ -423,7 +423,7 @@ function GallerySection({ navigate }) {
 
       {/* 3×2 photo grid */}
       <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'2px', opacity: fading ? 0 : 1, transition:'opacity 280ms ease' }}>
-        {photos.map((src, i) => (
+        {visible6.map((src, i) => (
           <div key={`${page}-${i}`} style={{ aspectRatio:'4/5', overflow:'hidden', ...sr(0.04 * i) }}>
             <div
               onMouseEnter={() => setHov(i)} onMouseLeave={() => setHov(null)}
@@ -443,7 +443,7 @@ function GallerySection({ navigate }) {
 
       {/* Page counter */}
       <div style={{ marginTop:'16px', textAlign:'center', fontFamily:'var(--font-body)', fontSize:'11px', letterSpacing:'0.12em', color:'var(--text-muted)', ...sr(0.3) }}>
-        {page + 1} / {totalPages} — {PORTFOLIO_PHOTOS.length} fotos
+        {page + 1} / {totalPages} — {photos.length} fotos
       </div>
     </section>
   )
