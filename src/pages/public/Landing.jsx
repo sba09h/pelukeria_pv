@@ -112,53 +112,26 @@ function Navbar({ currentPage, navigate }) {
         })}
       </div>
 
-      {/* Right side: Reservar + Acceso equipo */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-        {/* Acceso equipo — discreto */}
-        <button
-          onMouseEnter={() => setAdminHov(true)}
-          onMouseLeave={() => setAdminHov(false)}
-          onClick={() => navigate('/login')}
-          style={{
-            fontFamily: 'var(--font-body)', fontSize: '8px', fontWeight: 500,
-            letterSpacing: '0.18em', textTransform: 'uppercase',
-            color: dark
-              ? (adminHov ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.25)')
-              : (adminHov ? 'var(--color-black)' : 'var(--text-muted)'),
-            background: 'none', border: 'none', cursor: 'pointer',
-            transition: 'color 250ms ease',
-            display: 'flex', alignItems: 'center', gap: '4px',
-          }}>
-          Acceso equipo
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M7 17L17 7M7 7h10v10"/>
-          </svg>
-        </button>
-
-        {/* Reservar CTA */}
-        <button
-          onMouseEnter={() => setBtnHov(true)}
-          onMouseLeave={() => setBtnHov(false)}
-          onClick={() => navigate('/agendar')}
-          style={{
-            background: dark
-              ? (btnHov ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.1)')
-              : (btnHov ? 'transparent' : 'var(--color-black)'),
-            color: dark
-              ? (btnHov ? 'var(--color-black)' : 'rgba(255,255,255,0.9)')
-              : (btnHov ? 'var(--color-black)' : 'white'),
-            border: dark
-              ? '1px solid rgba(255,255,255,0.28)'
-              : '1px solid var(--color-black)',
-            padding: '10px 26px',
-            fontFamily: 'var(--font-body)', fontSize: 'var(--text-xs)', fontWeight: 500,
-            letterSpacing: 'var(--ls-widest)', textTransform: 'uppercase', cursor: 'pointer',
-            transition: 'all 250ms ease',
-            backdropFilter: dark ? 'blur(10px)' : 'none',
-          }}>
-          Reservar
-        </button>
-      </div>
+      {/* Right side: solo Acceso equipo */}
+      <button
+        onMouseEnter={() => setAdminHov(true)}
+        onMouseLeave={() => setAdminHov(false)}
+        onClick={() => navigate('/login')}
+        style={{
+          fontFamily: 'var(--font-body)', fontSize: '8px', fontWeight: 500,
+          letterSpacing: '0.18em', textTransform: 'uppercase',
+          color: dark
+            ? (adminHov ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.25)')
+            : (adminHov ? 'var(--color-black)' : 'var(--text-muted)'),
+          background: 'none', border: 'none', cursor: 'pointer',
+          transition: 'color 250ms ease',
+          display: 'flex', alignItems: 'center', gap: '4px',
+        }}>
+        Acceso equipo
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M7 17L17 7M7 7h10v10"/>
+        </svg>
+      </button>
     </nav>
   )
 }
@@ -175,7 +148,7 @@ function Footer({ navigate }) {
           <div>
             <LPKLogo size={48} />
             <p style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--text-sm)', color: 'rgba(255,255,255,0.35)', lineHeight: 1.8, maxWidth: '280px', marginTop: '20px' }}>
-              Hair salon moderno y minimalista en Puerto Varas. Corte, color y tratamientos de alta gama.
+              Peluquería moderna y minimalista en Puerto Varas. Corte, color y tratamientos de alta gama.
             </p>
           </div>
           <div>
@@ -246,27 +219,27 @@ function Hero({ navigate }) {
 
       {/* Hero copy */}
       <div style={{ position:'absolute', bottom:'84px', left:'56px', right:'50%', minWidth:'420px', zIndex:2 }}>
-        <div style={{ fontFamily:'var(--font-body)', fontSize:'8px', fontWeight:500, letterSpacing:'0.35em', textTransform:'uppercase', color:'rgba(255,255,255,.36)', marginBottom:'18px', ...fu(0.28) }}>
+        <div style={{ fontFamily:'var(--font-body)', fontSize:'9.6px', fontWeight:500, letterSpacing:'0.35em', textTransform:'uppercase', color:'rgba(255,255,255,.36)', marginBottom:'18px', ...fu(0.28) }}>
           Puerto Varas · Chile
         </div>
-        <div style={{ fontFamily:'var(--font-display)', fontWeight:300, fontSize:'clamp(54px,8.5vw,112px)', lineHeight:.88, letterSpacing:'-0.04em', color:'white', marginBottom:'4px', ...fu(0.45) }}>
+        <div style={{ fontFamily:'var(--font-display)', fontWeight:300, fontSize:'clamp(65px,10.2vw,134px)', lineHeight:.88, letterSpacing:'-0.04em', color:'white', marginBottom:'4px', ...fu(0.45) }}>
           La
         </div>
-        <div style={{ fontFamily:'var(--font-display)', fontWeight:300, fontSize:'clamp(54px,8.5vw,112px)', lineHeight:.88, letterSpacing:'-0.04em', color:'white', marginBottom:'22px', ...fu(0.58) }}>
+        <div style={{ fontFamily:'var(--font-display)', fontWeight:300, fontSize:'clamp(65px,10.2vw,134px)', lineHeight:.88, letterSpacing:'-0.04em', color:'white', marginBottom:'22px', ...fu(0.58) }}>
           Pelukeria
         </div>
-        <div style={{ fontFamily:'var(--font-display)', fontStyle:'italic', fontWeight:300, fontSize:'.95rem', color:'rgba(255,255,255,.3)', marginBottom:'40px', ...fu(0.8) }}>
+        <div style={{ fontFamily:'var(--font-display)', fontStyle:'italic', fontWeight:300, fontSize:'1.14rem', color:'rgba(255,255,255,.3)', marginBottom:'40px', ...fu(0.8) }}>
           Hair Salon
         </div>
         <div style={{ display:'flex', gap:'10px', ...fu(1.0) }}>
           <button onClick={() => navigate('/agendar')}
-            style={{ background:'rgba(255,255,255,.1)', color:'white', border:'1px solid rgba(255,255,255,.3)', padding:'13px 36px', fontFamily:'var(--font-body)', fontSize:'10px', fontWeight:500, letterSpacing:'0.2em', textTransform:'uppercase', cursor:'pointer', backdropFilter:'blur(10px)', WebkitBackdropFilter:'blur(10px)', transition:'all 200ms ease' }}
-            onMouseEnter={e=>{e.currentTarget.style.background='rgba(255,255,255,.9)';e.currentTarget.style.color='#000';}}
-            onMouseLeave={e=>{e.currentTarget.style.background='rgba(255,255,255,.1)';e.currentTarget.style.color='white';}}>
+            style={{ background:'white', color:'#0D0C0A', border:'1px solid white', padding:'15px 44px', fontFamily:'var(--font-body)', fontSize:'11px', fontWeight:600, letterSpacing:'0.22em', textTransform:'uppercase', cursor:'pointer', transition:'all 220ms ease', boxShadow:'0 0 32px rgba(255,255,255,0.18)' }}
+            onMouseEnter={e=>{e.currentTarget.style.background='transparent';e.currentTarget.style.color='white';e.currentTarget.style.boxShadow='none';}}
+            onMouseLeave={e=>{e.currentTarget.style.background='white';e.currentTarget.style.color='#0D0C0A';e.currentTarget.style.boxShadow='0 0 32px rgba(255,255,255,0.18)';}}>
             Reservar hora
           </button>
           <button onClick={() => navigate('/servicios')}
-            style={{ background:'transparent', color:'rgba(255,255,255,.65)', border:'1px solid rgba(255,255,255,.15)', padding:'13px 28px', fontFamily:'var(--font-body)', fontSize:'10px', fontWeight:500, letterSpacing:'0.2em', textTransform:'uppercase', cursor:'pointer', transition:'all 200ms ease' }}
+            style={{ background:'transparent', color:'rgba(255,255,255,.65)', border:'1px solid rgba(255,255,255,.15)', padding:'15px 28px', fontFamily:'var(--font-body)', fontSize:'11px', fontWeight:500, letterSpacing:'0.2em', textTransform:'uppercase', cursor:'pointer', transition:'all 200ms ease' }}
             onMouseEnter={e=>{e.currentTarget.style.color='white';e.currentTarget.style.borderColor='rgba(255,255,255,.32)';}}
             onMouseLeave={e=>{e.currentTarget.style.color='rgba(255,255,255,.65)';e.currentTarget.style.borderColor='rgba(255,255,255,.15)';}}>
             Ver servicios
