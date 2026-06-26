@@ -1,0 +1,553 @@
+import { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { MOCK_GALLERY } from '../../lib/mockData'
+
+// ── Keyframes injected once ───────────────────────────────────────────────────
+const KEYFRAMES = `
+  @keyframes lpkBlob1 {
+    0%,100% { transform:translate(0,0) scale(1);          opacity:.42; }
+    38%     { transform:translate(65px,-42px) scale(1.13); opacity:.64; }
+    70%     { transform:translate(-18px,28px) scale(.93);  opacity:.34; }
+  }
+  @keyframes lpkBlob2 {
+    0%,100% { transform:translate(0,0) scale(1);          opacity:.28; }
+    34%     { transform:translate(-62px,46px) scale(1.2);  opacity:.46; }
+    64%     { transform:translate(36px,-14px) scale(.9);   opacity:.22; }
+  }
+  @keyframes lpkBlob3 {
+    0%,100% { transform:translate(0,0);        opacity:.16; }
+    50%     { transform:translate(28px,-52px); opacity:.28; }
+  }
+  @keyframes lpkLineDraw {
+    from { transform:scaleX(0); transform-origin:left center; }
+    to   { transform:scaleX(1); transform-origin:left center; }
+  }
+  @keyframes lpkBounce {
+    0%,100% { transform:translateX(-50%) translateY(0); }
+    50%     { transform:translateX(-50%) translateY(7px); }
+  }
+`
+
+// ── Logo ──────────────────────────────────────────────────────────────────────
+function LPKLogo({ size = 40, onClick, invert = false }) {
+  return (
+    <img
+      src="/logo.webp"
+      alt="La Pelukeria"
+      onClick={onClick}
+      style={{
+        height: size,
+        width: 'auto',
+        objectFit: 'contain',
+        cursor: onClick ? 'pointer' : 'default',
+        filter: invert ? 'invert(1)' : 'none',
+        opacity: 0.95,
+        transition: 'opacity 200ms ease',
+      }}
+      onMouseEnter={e => { if (onClick) e.currentTarget.style.opacity = '0.75' }}
+      onMouseLeave={e => { if (onClick) e.currentTarget.style.opacity = '0.95' }}
+    />
+  )
+}
+
+// ── Navbar ────────────────────────────────────────────────────────────────────
+function Navbar({ currentPage, navigate }) {
+  const [scrolled, setScrolled] = useState(false)
+  const [btnHov,   setBtnHov]   = useState(false)
+  const [adminHov, setAdminHov] = useState(false)
+
+  useEffect(() => {
+    if (currentPage !== 'home') { setScrolled(false); return }
+    const check = () => setScrolled(window.scrollY > window.innerHeight * 0.72)
+    check()
+    window.addEventListener('scroll', check, { passive: true })
+    return () => window.removeEventListener('scroll', check)
+  }, [currentPage])
+
+  const isHome = currentPage === 'home'
+  const dark   = isHome && !scrolled
+
+  const fg      = dark ? 'rgba(255,255,255,0.9)' : 'var(--color-black)'
+  const fgMuted = dark ? 'rgba(255,255,255,0.45)' : 'var(--text-secondary)'
+  const activeBdr = dark ? 'rgba(255,255,255,0.7)' : 'var(--color-black)'
+
+  const links = [
+    { key: 'home',     label: 'Inicio',    path: '/'          },
+    { key: 'services', label: 'Servicios', path: '/servicios' },
+    { key: 'gallery',  label: 'Galería',   path: '/galeria'   },
+  ]
+
+  return (
+    <nav style={{
+      position: isHome ? 'fixed' : 'sticky',
+      top: 0, left: 0, right: 0, zIndex: 100,
+      height: 'var(--navbar-height)',
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      padding: '0 48px',
+      background: dark ? 'rgba(13,12,10,0.28)' : 'rgba(255,255,255,0.94)',
+      backdropFilter: 'blur(22px)',
+      WebkitBackdropFilter: 'blur(22px)',
+      borderBottom: dark ? '1px solid rgba(255,255,255,0.07)' : '1px solid var(--border-default)',
+      transition: 'background 420ms ease, border-color 420ms ease',
+    }}>
+      <LPKLogo size={42} onClick={() => navigate('/')} />
+
+      {/* Nav links */}
+      <div style={{ display: 'flex', gap: '40px' }}>
+        {links.map(link => {
+          const active = currentPage === link.key
+          return (
+            <button key={link.key} onClick={() => navigate(link.path)} style={{
+              fontFamily: 'var(--font-body)', fontSize: 'var(--text-xs)', fontWeight: 500,
+              letterSpacing: 'var(--ls-wider)', textTransform: 'uppercase',
+              color: active ? fg : fgMuted,
+              background: 'none', border: 'none',
+              borderBottom: active ? `1px solid ${activeBdr}` : '1px solid transparent',
+              paddingBottom: '2px', cursor: 'pointer',
+              transition: 'color 300ms ease, border-color 300ms ease',
+            }}>
+              {link.label}
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Right side: Reservar + Acceso equipo */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        {/* Acceso equipo — discreto */}
+        <button
+          onMouseEnter={() => setAdminHov(true)}
+          onMouseLeave={() => setAdminHov(false)}
+          onClick={() => navigate('/login')}
+          style={{
+            fontFamily: 'var(--font-body)', fontSize: '8px', fontWeight: 500,
+            letterSpacing: '0.18em', textTransform: 'uppercase',
+            color: dark
+              ? (adminHov ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.25)')
+              : (adminHov ? 'var(--color-black)' : 'var(--text-muted)'),
+            background: 'none', border: 'none', cursor: 'pointer',
+            transition: 'color 250ms ease',
+            display: 'flex', alignItems: 'center', gap: '4px',
+          }}>
+          Acceso equipo
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M7 17L17 7M7 7h10v10"/>
+          </svg>
+        </button>
+
+        {/* Reservar CTA */}
+        <button
+          onMouseEnter={() => setBtnHov(true)}
+          onMouseLeave={() => setBtnHov(false)}
+          onClick={() => navigate('/agendar')}
+          style={{
+            background: dark
+              ? (btnHov ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.1)')
+              : (btnHov ? 'transparent' : 'var(--color-black)'),
+            color: dark
+              ? (btnHov ? 'var(--color-black)' : 'rgba(255,255,255,0.9)')
+              : (btnHov ? 'var(--color-black)' : 'white'),
+            border: dark
+              ? '1px solid rgba(255,255,255,0.28)'
+              : '1px solid var(--color-black)',
+            padding: '10px 26px',
+            fontFamily: 'var(--font-body)', fontSize: 'var(--text-xs)', fontWeight: 500,
+            letterSpacing: 'var(--ls-widest)', textTransform: 'uppercase', cursor: 'pointer',
+            transition: 'all 250ms ease',
+            backdropFilter: dark ? 'blur(10px)' : 'none',
+          }}>
+          Reservar
+        </button>
+      </div>
+    </nav>
+  )
+}
+
+// ── Footer ────────────────────────────────────────────────────────────────────
+function Footer({ navigate }) {
+  const col = { fontFamily: 'var(--font-body)', fontSize: 'var(--text-sm)', color: 'rgba(255,255,255,0.45)', lineHeight: 2 }
+  const colLabel = { fontFamily: 'var(--font-body)', fontSize: '8px', fontWeight: 500, letterSpacing: '0.22em', textTransform: 'uppercase', opacity: 0.3, marginBottom: '14px', display: 'block' }
+
+  return (
+    <footer style={{ background: 'var(--color-warm-950)', color: 'white', padding: '64px 48px 28px' }}>
+      <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '48px', paddingBottom: '40px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+          <div>
+            <LPKLogo size={48} />
+            <p style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--text-sm)', color: 'rgba(255,255,255,0.35)', lineHeight: 1.8, maxWidth: '280px', marginTop: '20px' }}>
+              Hair salon moderno y minimalista en Puerto Varas. Corte, color y tratamientos de alta gama.
+            </p>
+          </div>
+          <div>
+            <span style={colLabel}>Horario</span>
+            <div style={col}>
+              <div>Mar – Vie · 9:30 – 19:00</div>
+              <div>Sábado · 10:00 – 18:00</div>
+              <div style={{ opacity: 0.4 }}>Lun – Dom · Cerrado</div>
+            </div>
+          </div>
+          <div>
+            <span style={colLabel}>Contacto</span>
+            <div style={col}>
+              <div>Puerto Varas, Chile</div>
+              <div>+56 9 2999 3799</div>
+              <div>@lapelukeria_pv</div>
+            </div>
+          </div>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '20px' }}>
+          <div style={{ fontFamily: 'var(--font-body)', fontSize: '9px', color: 'rgba(255,255,255,0.18)', letterSpacing: '0.1em' }}>
+            © {new Date().getFullYear()} La Pelukeria · Puerto Varas
+          </div>
+          <button onClick={() => navigate('/login')} style={{ fontFamily: 'var(--font-body)', fontSize: '8px', color: 'rgba(255,255,255,0.15)', letterSpacing: '0.12em', textTransform: 'uppercase', background: 'none', border: 'none', cursor: 'pointer', transition: 'color 200ms' }}
+            onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.45)'}
+            onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.15)'}>
+            Acceso equipo ↗
+          </button>
+        </div>
+      </div>
+    </footer>
+  )
+}
+
+// ── Hero ──────────────────────────────────────────────────────────────────────
+function Hero({ navigate }) {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    const t = setTimeout(() => setMounted(true), 60)
+    return () => clearTimeout(t)
+  }, [])
+
+  const fu = (d) => ({
+    opacity:   mounted ? 1 : 0,
+    transform: mounted ? 'translateY(0px)' : 'translateY(26px)',
+    transition: `opacity .72s cubic-bezier(.16,1,.3,1) ${d}s, transform .72s cubic-bezier(.16,1,.3,1) ${d}s`,
+  })
+
+  return (
+    <section style={{ height: '100vh', background: '#0D0C0A', position: 'relative', overflow: 'hidden' }}>
+      {/* Blobs */}
+      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+        <div style={{ position:'absolute', width:'65%', height:'68%', top:'-10%', right:'-14%', background:'radial-gradient(ellipse, rgba(139,126,110,.44) 0%, rgba(107,103,96,.16) 42%, transparent 70%)', animation:'lpkBlob1 13s ease-in-out infinite', willChange:'transform' }} />
+        <div style={{ position:'absolute', width:'56%', height:'58%', bottom:'-10%', left:'-14%', background:'radial-gradient(ellipse, rgba(80,72,60,.52) 0%, rgba(61,59,55,.2) 42%, transparent 70%)', animation:'lpkBlob2 18s ease-in-out infinite', willChange:'transform' }} />
+        <div style={{ position:'absolute', width:'38%', height:'38%', top:'30%', left:'36%', background:'radial-gradient(ellipse, rgba(176,162,145,.15) 0%, transparent 70%)', animation:'lpkBlob3 22s ease-in-out infinite' }} />
+        {/* Pixel grid */}
+        <div style={{ position:'absolute', inset:0, backgroundImage:'linear-gradient(rgba(255,255,255,.016) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.016) 1px, transparent 1px)', backgroundSize:'80px 80px' }} />
+        {/* Vignettes */}
+        <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, transparent 35%, rgba(10,9,8,.82) 100%)' }} />
+        <div style={{ position:'absolute', inset:0, background:'linear-gradient(to right, rgba(10,9,8,.32) 0%, transparent 50%)' }} />
+      </div>
+
+      {/* Scan line */}
+      {mounted && (
+        <div style={{ position:'absolute', top:'38%', left:0, right:0, height:'1px', background:'linear-gradient(to right, transparent 0%, rgba(255,255,255,.055) 25%, rgba(255,255,255,.055) 75%, transparent 100%)', transformOrigin:'left center', animation:'lpkLineDraw 2s cubic-bezier(.16,1,.3,1) .1s both', pointerEvents:'none' }} />
+      )}
+
+      {/* Hero copy */}
+      <div style={{ position:'absolute', bottom:'84px', left:'56px', right:'50%', minWidth:'420px', zIndex:2 }}>
+        <div style={{ fontFamily:'var(--font-body)', fontSize:'8px', fontWeight:500, letterSpacing:'0.35em', textTransform:'uppercase', color:'rgba(255,255,255,.36)', marginBottom:'18px', ...fu(0.28) }}>
+          Puerto Varas · Chile
+        </div>
+        <div style={{ fontFamily:'var(--font-display)', fontWeight:300, fontSize:'clamp(54px,8.5vw,112px)', lineHeight:.88, letterSpacing:'-0.04em', color:'white', marginBottom:'4px', ...fu(0.45) }}>
+          La
+        </div>
+        <div style={{ fontFamily:'var(--font-display)', fontWeight:300, fontSize:'clamp(54px,8.5vw,112px)', lineHeight:.88, letterSpacing:'-0.04em', color:'white', marginBottom:'22px', ...fu(0.58) }}>
+          Pelukeria
+        </div>
+        <div style={{ fontFamily:'var(--font-display)', fontStyle:'italic', fontWeight:300, fontSize:'.95rem', color:'rgba(255,255,255,.3)', marginBottom:'40px', ...fu(0.8) }}>
+          Hair Salon
+        </div>
+        <div style={{ display:'flex', gap:'10px', ...fu(1.0) }}>
+          <button onClick={() => navigate('/agendar')}
+            style={{ background:'rgba(255,255,255,.1)', color:'white', border:'1px solid rgba(255,255,255,.3)', padding:'13px 36px', fontFamily:'var(--font-body)', fontSize:'10px', fontWeight:500, letterSpacing:'0.2em', textTransform:'uppercase', cursor:'pointer', backdropFilter:'blur(10px)', WebkitBackdropFilter:'blur(10px)', transition:'all 200ms ease' }}
+            onMouseEnter={e=>{e.currentTarget.style.background='rgba(255,255,255,.9)';e.currentTarget.style.color='#000';}}
+            onMouseLeave={e=>{e.currentTarget.style.background='rgba(255,255,255,.1)';e.currentTarget.style.color='white';}}>
+            Reservar hora
+          </button>
+          <button onClick={() => navigate('/servicios')}
+            style={{ background:'transparent', color:'rgba(255,255,255,.65)', border:'1px solid rgba(255,255,255,.15)', padding:'13px 28px', fontFamily:'var(--font-body)', fontSize:'10px', fontWeight:500, letterSpacing:'0.2em', textTransform:'uppercase', cursor:'pointer', transition:'all 200ms ease' }}
+            onMouseEnter={e=>{e.currentTarget.style.color='white';e.currentTarget.style.borderColor='rgba(255,255,255,.32)';}}
+            onMouseLeave={e=>{e.currentTarget.style.color='rgba(255,255,255,.65)';e.currentTarget.style.borderColor='rgba(255,255,255,.15)';}}>
+            Ver servicios
+          </button>
+        </div>
+      </div>
+
+      {/* Scroll indicator */}
+      {mounted && (
+        <div style={{ position:'absolute', bottom:'28px', left:'50%', display:'flex', flexDirection:'column', alignItems:'center', gap:'8px', animation:'lpkBounce 2.2s ease-in-out 1.4s infinite', zIndex:2 }}>
+          <div style={{ fontFamily:'var(--font-body)', fontSize:'7px', letterSpacing:'0.22em', textTransform:'uppercase', color:'rgba(255,255,255,.17)' }}>Scroll</div>
+          <div style={{ width:'1px', height:'36px', background:'linear-gradient(to bottom, rgba(255,255,255,.14), transparent)' }} />
+        </div>
+      )}
+    </section>
+  )
+}
+
+// ── Services Section ──────────────────────────────────────────────────────────
+function ServicesSection({ navigate }) {
+  const [visible, setVisible] = useState(false)
+  const [hov,     setHov]     = useState(null)
+  const ref = useRef(null)
+
+  useEffect(() => {
+    const io = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) setVisible(true)
+    }, { threshold: 0.12 })
+    if (ref.current) io.observe(ref.current)
+    return () => io.disconnect()
+  }, [])
+
+  const sr = (d) => ({
+    opacity:    visible ? 1 : 0,
+    transform:  visible ? 'translateY(0px)' : 'translateY(22px)',
+    transition: `opacity .6s cubic-bezier(.16,1,.3,1) ${d}s, transform .6s cubic-bezier(.16,1,.3,1) ${d}s`,
+  })
+
+  const services = [
+    { num: '01', name: 'Corte',        desc: 'Corte artístico adaptado a tu morfología facial y estilo de vida.',  price: 'desde $10.000' },
+    { num: '02', name: 'Color',        desc: 'Técnicas de alta gama: Balayage, mechas, tinte, decoloración.',      price: 'desde $35.000' },
+    { num: '03', name: 'Tratamientos', desc: 'Nutrición profunda y restauración de la fibra capilar.',             price: 'desde $20.000' },
+  ]
+
+  return (
+    <section ref={ref} style={{ padding:'96px 48px', maxWidth:'1280px', margin:'0 auto' }}>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'baseline', marginBottom:'48px', paddingBottom:'20px', borderBottom:'1px solid var(--border-default)', ...sr(0) }}>
+        <h2 style={{ fontFamily:'var(--font-display)', fontSize:'var(--text-4xl)', fontWeight:300, letterSpacing:'-0.02em' }}>Servicios</h2>
+        <button onClick={() => navigate('/servicios')} style={{ fontFamily:'var(--font-body)', fontSize:'var(--text-xs)', fontWeight:500, letterSpacing:'0.15em', textTransform:'uppercase', color:'var(--text-secondary)', background:'none', border:'none', borderBottom:'1px solid var(--border-default)', paddingBottom:'1px', cursor:'pointer' }}>
+          Ver todos →
+        </button>
+      </div>
+
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'1px', background:'var(--border-default)' }}>
+        {services.map((s, i) => (
+          <div key={i} style={{ ...sr(0.1 + i * 0.1) }}>
+            <div
+              onMouseEnter={() => setHov(i)} onMouseLeave={() => setHov(null)}
+              onClick={() => navigate('/servicios')}
+              style={{ height:'100%', background:hov===i?'#000':'#fff', color:hov===i?'white':'inherit', padding:'48px 40px', cursor:'pointer', transition:'background 220ms ease, color 220ms ease' }}>
+              <div style={{ fontFamily:'var(--font-body)', fontSize:'9px', fontWeight:500, letterSpacing:'0.2em', textTransform:'uppercase', color:hov===i?'rgba(255,255,255,.3)':'var(--text-muted)', marginBottom:'20px' }}>{s.num}</div>
+              <h3 style={{ fontFamily:'var(--font-display)', fontSize:'var(--text-3xl)', fontWeight:300, marginBottom:'14px' }}>{s.name}</h3>
+              <p style={{ fontFamily:'var(--font-body)', fontSize:'var(--text-sm)', lineHeight:1.75, color:hov===i?'rgba(255,255,255,.5)':'var(--text-secondary)', marginBottom:'28px' }}>{s.desc}</p>
+              <div style={{ fontFamily:'var(--font-body)', fontSize:'var(--text-sm)', fontWeight:500 }}>{s.price}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+// Portfolio photos (from /public/portafolio/)
+const PORTFOLIO_PHOTOS = [
+  '491445162_17871415572345251_368358495502043921_n.webp',
+  '491899885_17871415590345251_8944960919762388264_n.webp',
+  '502018196_17875982268345251_4081439649387061853_n.webp',
+  '524702296_17883322164345251_7572641808358478543_n.webp',
+  '538166651_17886691155345251_8361318768342532532_n_5_11zon.webp',
+  '539394048_18149462677400511_5053722861017725537_n_6_11zon.webp',
+  '547783918_17889233850345251_1500390999692302985_n_10_11zon.webp',
+  '548836459_17889702885345251_1329868695909128978_n_1_11zon.webp',
+  '626296687_17906323050345251_4500384965311275525_n_7_11zon.webp',
+  '671260714_17917408578345251_2391417951895553459_n_6_11zon.webp',
+  'foto1_18_11zon.webp',
+].map(f => `/portafolio/${f}`)
+
+const SLOTS = 6 // visible grid cells
+
+// ── Gallery Section ───────────────────────────────────────────────────────────
+function GallerySection({ navigate }) {
+  const [visible,  setVisible]  = useState(false)
+  const [hov,      setHov]      = useState(null)
+  const [page,     setPage]     = useState(0)        // which "page" of 6 we show
+  const [fading,   setFading]   = useState(false)    // cross-fade trigger
+  const [paused,   setPaused]   = useState(false)
+  const ref = useRef(null)
+
+  const totalPages = Math.ceil(PORTFOLIO_PHOTOS.length / SLOTS)
+
+  // Scroll-reveal
+  useEffect(() => {
+    const io = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) setVisible(true)
+    }, { threshold: 0.12 })
+    if (ref.current) io.observe(ref.current)
+    return () => io.disconnect()
+  }, [])
+
+  // Auto-rotate every 3.5 s
+  useEffect(() => {
+    if (paused) return
+    const t = setInterval(() => goTo((p) => (p + 1) % totalPages), 3500)
+    return () => clearInterval(t)
+  }, [paused, totalPages])
+
+  function goTo(nextFn) {
+    setFading(true)
+    setTimeout(() => {
+      setPage(typeof nextFn === 'function' ? nextFn : () => nextFn)
+      setFading(false)
+    }, 280)
+  }
+
+  const sr = (d) => ({
+    opacity:    visible ? 1 : 0,
+    transform:  visible ? 'translateY(0px)' : 'translateY(22px)',
+    transition: `opacity .6s cubic-bezier(.16,1,.3,1) ${d}s, transform .6s cubic-bezier(.16,1,.3,1) ${d}s`,
+  })
+
+  // Current 6 photos (pad with first ones if last page is short)
+  const start  = page * SLOTS
+  const slice  = PORTFOLIO_PHOTOS.slice(start, start + SLOTS)
+  const photos = slice.length < SLOTS
+    ? [...slice, ...PORTFOLIO_PHOTOS.slice(0, SLOTS - slice.length)]
+    : slice
+
+  return (
+    <section
+      ref={ref}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      style={{ padding:'0 48px 96px', maxWidth:'1280px', margin:'0 auto' }}
+    >
+      {/* Header */}
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'32px', paddingBottom:'20px', borderBottom:'1px solid var(--border-default)', ...sr(0) }}>
+        <h2 style={{ fontFamily:'var(--font-display)', fontSize:'var(--text-4xl)', fontWeight:300, letterSpacing:'-0.02em' }}>Portfolio</h2>
+        <div style={{ display:'flex', alignItems:'center', gap:'16px' }}>
+          {/* Dot indicators */}
+          <div style={{ display:'flex', gap:'6px' }}>
+            {Array.from({ length: totalPages }).map((_, i) => (
+              <button
+                key={i}
+                onClick={() => goTo(i)}
+                style={{
+                  width: i === page ? '20px' : '6px', height:'6px',
+                  borderRadius:'3px', border:'none', cursor:'pointer',
+                  background: i === page ? 'var(--color-black)' : 'var(--border-default)',
+                  transition:'all 300ms ease', padding:0,
+                }}
+              />
+            ))}
+          </div>
+          {/* Prev / Next */}
+          <div style={{ display:'flex', gap:'4px' }}>
+            {['←','→'].map((arrow, dir) => (
+              <button
+                key={arrow}
+                onClick={() => goTo(p => dir === 0 ? (p - 1 + totalPages) % totalPages : (p + 1) % totalPages)}
+                style={{ width:'32px', height:'32px', borderRadius:'8px', border:'1px solid var(--border-default)', background:'none', cursor:'pointer', fontFamily:'monospace', fontSize:'14px', color:'var(--text-secondary)', display:'flex', alignItems:'center', justifyContent:'center', transition:'all 200ms ease' }}
+                onMouseEnter={e => { e.currentTarget.style.background='var(--color-black)'; e.currentTarget.style.color='white'; e.currentTarget.style.borderColor='var(--color-black)' }}
+                onMouseLeave={e => { e.currentTarget.style.background='none'; e.currentTarget.style.color='var(--text-secondary)'; e.currentTarget.style.borderColor='var(--border-default)' }}
+              >{arrow}</button>
+            ))}
+          </div>
+          <button onClick={() => navigate('/galeria')} style={{ fontFamily:'var(--font-body)', fontSize:'var(--text-xs)', fontWeight:500, letterSpacing:'0.15em', textTransform:'uppercase', color:'var(--text-secondary)', background:'none', border:'none', borderBottom:'1px solid var(--border-default)', paddingBottom:'1px', cursor:'pointer' }}>
+            Ver galería →
+          </button>
+        </div>
+      </div>
+
+      {/* 3×2 photo grid */}
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:'2px', opacity: fading ? 0 : 1, transition:'opacity 280ms ease' }}>
+        {photos.map((src, i) => (
+          <div key={`${page}-${i}`} style={{ aspectRatio:'4/5', overflow:'hidden', ...sr(0.04 * i) }}>
+            <div
+              onMouseEnter={() => setHov(i)} onMouseLeave={() => setHov(null)}
+              onClick={() => navigate('/galeria')}
+              style={{ width:'100%', height:'100%', cursor:'pointer', position:'relative', transition:'opacity 250ms ease', opacity: hov!==null && hov!==i ? 0.55 : 1 }}
+            >
+              <img
+                src={src}
+                alt={`Portfolio ${start + i + 1}`}
+                style={{ width:'100%', height:'100%', objectFit:'cover', display:'block', transition:'transform 500ms ease', transform: hov===i ? 'scale(1.04)' : 'scale(1)' }}
+                loading="lazy"
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Page counter */}
+      <div style={{ marginTop:'16px', textAlign:'center', fontFamily:'var(--font-body)', fontSize:'11px', letterSpacing:'0.12em', color:'var(--text-muted)', ...sr(0.3) }}>
+        {page + 1} / {totalPages} — {PORTFOLIO_PHOTOS.length} fotos
+      </div>
+    </section>
+  )
+}
+
+// ── Loyalty Teaser ────────────────────────────────────────────────────────────
+function LoyaltyTeaser({ navigate }) {
+  const [hov, setHov] = useState(false)
+
+  return (
+    <section style={{ background:'var(--color-warm-50)', borderTop:'1px solid var(--border-default)', borderBottom:'1px solid var(--border-default)' }}>
+      <div style={{ maxWidth:'1280px', margin:'0 auto', padding:'80px 48px', display:'grid', gridTemplateColumns:'1fr 1fr', gap:'64px', alignItems:'center' }}>
+        <div>
+          <div style={{ fontFamily:'var(--font-body)', fontSize:'8px', fontWeight:500, letterSpacing:'0.3em', textTransform:'uppercase', color:'var(--text-muted)', marginBottom:'16px' }}>
+            Programa de fidelidad
+          </div>
+          <h2 style={{ fontFamily:'var(--font-display)', fontSize:'var(--text-4xl)', fontWeight:300, letterSpacing:'-0.02em', lineHeight:1.1, marginBottom:'20px' }}>
+            Cada visita<br/>te premia
+          </h2>
+          <p style={{ fontFamily:'var(--font-body)', fontSize:'var(--text-sm)', color:'var(--text-secondary)', lineHeight:1.8, marginBottom:'36px', maxWidth:'380px' }}>
+            Acumula puntos en cada servicio y canjéalos por descuentos. Consulta tu saldo cuando quieras con tu RUT.
+          </p>
+          <button
+            onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}
+            onClick={() => navigate('/mis-puntos')}
+            style={{ background: hov ? 'var(--color-black)' : 'transparent', color: hov ? 'white' : 'var(--color-black)', border:'1px solid var(--color-black)', padding:'12px 32px', fontFamily:'var(--font-body)', fontSize:'10px', fontWeight:500, letterSpacing:'0.18em', textTransform:'uppercase', cursor:'pointer', transition:'all 220ms ease' }}>
+            Ver mis puntos
+          </button>
+        </div>
+
+        {/* Mini loyalty card visual */}
+        <div style={{ display:'flex', justifyContent:'center' }}>
+          <div style={{ width:'300px', aspectRatio:'1.6/1', background:'linear-gradient(135deg, #1A1917 0%, #3D3B37 60%, #6B6760 100%)', borderRadius:'16px', padding:'28px', display:'flex', flexDirection:'column', justifyContent:'space-between', boxShadow:'0 24px 64px rgba(0,0,0,0.22)' }}>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
+              <div style={{ fontFamily: 'var(--font-display)', fontWeight: 300, fontSize: '1.4rem', lineHeight: 1, letterSpacing: '-0.03em', color: 'white' }}>LPk</div>
+              <div style={{ fontFamily:'var(--font-body)', fontSize:'7px', fontWeight:500, letterSpacing:'0.25em', textTransform:'uppercase', color:'rgba(255,255,255,0.35)' }}>Loyalty</div>
+            </div>
+            <div>
+              <div style={{ fontFamily:'var(--font-body)', fontSize:'8px', letterSpacing:'0.2em', textTransform:'uppercase', color:'rgba(255,255,255,0.3)', marginBottom:'4px' }}>Puntos acumulados</div>
+              <div style={{ fontFamily:'var(--font-display)', fontSize:'2.4rem', fontWeight:300, color:'white', letterSpacing:'-0.02em' }}>1.250 pts</div>
+              {/* Progress bar */}
+              <div style={{ marginTop:'12px', height:'2px', background:'rgba(255,255,255,0.12)', borderRadius:'1px', overflow:'hidden' }}>
+                <div style={{ height:'100%', width:'62%', background:'rgba(200,184,154,0.7)', borderRadius:'1px' }} />
+              </div>
+              <div style={{ fontFamily:'var(--font-body)', fontSize:'7px', color:'rgba(255,255,255,0.25)', marginTop:'6px', letterSpacing:'0.1em' }}>750 pts para tu próximo beneficio</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// ── Main Landing Page ─────────────────────────────────────────────────────────
+export default function Landing() {
+  const navigate = useNavigate()
+
+  // Inject keyframes once
+  useEffect(() => {
+    if (!document.getElementById('lpk-kf')) {
+      const s = document.createElement('style')
+      s.id = 'lpk-kf'
+      s.textContent = KEYFRAMES
+      document.head.appendChild(s)
+    }
+  }, [])
+
+  const goTo = (path) => navigate(path)
+
+  return (
+    <div style={{ fontFamily: 'var(--font-body)', color: 'var(--text-primary)', background: 'var(--bg-primary)' }}>
+      <Navbar currentPage="home" navigate={goTo} />
+      <Hero navigate={goTo} />
+      <ServicesSection navigate={goTo} />
+      <GallerySection navigate={goTo} />
+      <LoyaltyTeaser navigate={goTo} />
+      <Footer navigate={goTo} />
+    </div>
+  )
+}

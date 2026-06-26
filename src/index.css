@@ -1,0 +1,108 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── La Pelukeria Design Tokens (from handoff) ───────────────────────────── */
+:root {
+  --font-display: 'Cormorant', Georgia, 'Times New Roman', serif;
+  --font-body:    'DM Sans', system-ui, -apple-system, sans-serif;
+
+  --color-black:      #000000;
+  --color-white:      #FFFFFF;
+  --color-warm-950:   #0D0C0A;
+  --color-warm-900:   #1A1917;
+  --color-warm-800:   #2B2926;
+  --color-warm-700:   #3D3B37;
+  --color-warm-600:   #555249;
+  --color-warm-500:   #6B6760;
+  --color-warm-400:   #8C8880;
+  --color-warm-300:   #AFABA3;
+  --color-warm-200:   #CCC9C3;
+  --color-warm-100:   #E2DED8;
+  --color-warm-50:    #F4F2EE;
+  --color-taupe-500:  #8B7E6E;
+  --color-taupe-300:  #B8ADA0;
+  --color-taupe-100:  #EAE4DC;
+
+  --bg-primary:       var(--color-white);
+  --bg-secondary:     var(--color-warm-50);
+  --text-primary:     var(--color-black);
+  --text-secondary:   var(--color-warm-500);
+  --text-muted:       var(--color-warm-400);
+  --border-default:   var(--color-warm-200);
+  --border-subtle:    var(--color-warm-100);
+
+  --text-xs:   0.6875rem;
+  --text-sm:   0.8125rem;
+  --text-base: 1rem;
+  --text-2xl:  1.75rem;
+  --text-3xl:  2.25rem;
+  --text-4xl:  3rem;
+  --text-5xl:  4rem;
+  --navbar-height: 64px;
+  --fw-medium: 500;
+  --ls-wider:  0.12em;
+  --ls-widest: 0.22em;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background-color: #FAFAFA;
+    color: #0A0A0A;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #F5F5F5;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #D4D4D4;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #A3A3A3;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-dark-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-dark-700 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+  .btn-secondary {
+    @apply bg-white text-dark-900 border border-dark-200 px-4 py-2 rounded-lg text-sm font-medium hover:bg-dark-50 transition-colors duration-150;
+  }
+  .btn-brand {
+    @apply bg-brand-400 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-brand-500 transition-colors duration-150;
+  }
+  .input {
+    @apply w-full border border-dark-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent transition-all;
+  }
+  .label-xs {
+    @apply block text-xs font-medium text-dark-600 mb-1.5;
+  }
+  .card {
+    @apply bg-white rounded-xl border border-dark-100 shadow-card;
+  }
+  .status-pendiente {
+    @apply bg-amber-50 text-amber-700 border border-amber-200;
+  }
+  .status-confirmada {
+    @apply bg-blue-50 text-blue-700 border border-blue-200;
+  }
+  .status-en_atencion {
+    @apply bg-purple-50 text-purple-700 border border-purple-200;
+  }
+  .status-completada {
+    @apply bg-green-50 text-green-700 border border-green-200;
+  }
+  .status-cancelada {
+    @apply bg-red-50 text-red-700 border border-red-200;
+  }
+}
