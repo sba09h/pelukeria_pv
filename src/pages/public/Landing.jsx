@@ -416,36 +416,27 @@ function Hero({ navigate }) {
   return (
     <section style={{ height: '100vh', background: '#0D0C0A', position: 'relative', overflow: 'hidden' }}>
 
-      {/* Video background */}
-      <video
-        autoPlay muted loop playsInline
-        style={{
-          position: 'absolute', inset: 0,
-          width: '100%', height: '100%',
-          objectFit: 'cover',
-          zIndex: 0,
-        }}
-      >
-        <source src="/hero-bg.mp4" type="video/mp4" />
-      </video>
+      {/* Fondo animado — orbs cálidos + grain */}
+      <HeroBg />
 
-      {/* Overlays: color de marca + viñetas */}
-      <div style={{ position:'absolute', inset:0, pointerEvents:'none', zIndex:1 }}>
-        {/* Tinte cálido de marca sobre el video */}
-        <div style={{ position:'absolute', inset:0, background:'rgba(10,8,6,0.42)', mixBlendMode:'multiply' }} />
-        {/* Viñeta inferior — oscurece para leer el texto */}
-        <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, transparent 25%, rgba(8,7,5,.92) 100%)' }} />
+      {/* Partículas flotantes */}
+      <Particles />
+
+      {/* Overlays: grid + viñetas */}
+      <div style={{ position:'absolute', inset:0, pointerEvents:'none', zIndex:2 }}>
+        {/* Pixel grid */}
+        <div style={{ position:'absolute', inset:0, backgroundImage:'linear-gradient(rgba(255,255,255,.014) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.014) 1px, transparent 1px)', backgroundSize:'80px 80px' }} />
+        {/* Viñeta inferior */}
+        <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, transparent 28%, rgba(10,9,8,.88) 100%)' }} />
         {/* Viñeta lateral izquierda */}
-        <div style={{ position:'absolute', inset:0, background:'linear-gradient(to right, rgba(8,7,5,.52) 0%, transparent 60%)' }} />
+        <div style={{ position:'absolute', inset:0, background:'linear-gradient(to right, rgba(10,9,8,.38) 0%, transparent 55%)' }} />
         {/* Viñeta superior */}
-        <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, rgba(8,7,5,.55) 0%, transparent 20%)' }} />
-        {/* Pixel grid sutil */}
-        <div style={{ position:'absolute', inset:0, backgroundImage:'linear-gradient(rgba(255,255,255,.01) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.01) 1px, transparent 1px)', backgroundSize:'80px 80px' }} />
+        <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, rgba(10,9,8,.45) 0%, transparent 22%)' }} />
       </div>
 
 
       {/* Hero copy */}
-      <div style={{ position:'absolute', bottom:'84px', left:'56px', right:'50%', minWidth:'420px', zIndex:3 }}>
+      <div style={{ position:'absolute', bottom:'84px', left:'56px', right:'50%', minWidth:'420px', zIndex:2 }}>
         <div style={{ fontFamily:'var(--font-body)', fontSize:'9.6px', fontWeight:500, letterSpacing:'0.35em', textTransform:'uppercase', color:'rgba(255,255,255,.36)', marginBottom:'18px', ...fu(0.28) }}>
           Puerto Varas · Chile
         </div>
