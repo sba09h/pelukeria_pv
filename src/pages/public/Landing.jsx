@@ -200,6 +200,92 @@ function Footer({ navigate }) {
 }
 
 
+// ── Floating particles ────────────────────────────────────────────────────────
+function Particles() {
+  const canvasRef = useRef(null)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+
+    const resize = () => {
+      canvas.width  = canvas.offsetWidth
+      canvas.height = canvas.offsetHeight
+    }
+    resize()
+    window.addEventListener('resize', resize)
+
+    // 60 partículas: mezcla de puntos blancos y dorado-cálido
+    const particles = Array.from({ length: 60 }, () => ({
+      x:       Math.random(),           // 0-1 normalizado
+      y:       Math.random(),
+      r:       Math.random() * 1.3 + 0.3,            // radio 0.3–1.6 px
+      opacity: Math.random() * 0.26 + 0.05,          // 0.05–0.31
+      vy:      -(Math.random() * 0.25 + 0.08),       // sube lento
+      vx:      (Math.random() - 0.5) * 0.12,         // leve deriva horizontal
+      warm:    Math.random(),                          // 0=blanco, 1=dorado suave
+      pulse:   Math.random() * Math.PI * 2,           // fase de pulso
+      pulseSpeed: Math.random() * 0.012 + 0.004,     // velocidad del pulso
+    }))
+
+    let animId
+    const W = () => canvas.width
+    const H = () => canvas.height
+
+    const draw = () => {
+      ctx.clearRect(0, 0, W(), H())
+
+      particles.forEach(p => {
+        // Pulso de opacidad suave
+        p.pulse += p.pulseSpeed
+        const op = p.opacity * (0.7 + 0.3 * Math.sin(p.pulse))
+
+        // Color: blanco puro → dorado cálido
+        const r = 255
+        const g = Math.round(255 - p.warm * 38)   // 217–255
+        const b = Math.round(255 - p.warm * 115)  // 140–255
+
+        ctx.beginPath()
+        ctx.arc(p.x * W(), p.y * H(), p.r, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(${r},${g},${b},${op})`
+        ctx.fill()
+
+        // Movimiento
+        p.x += p.vx / W()
+        p.y += p.vy / H()
+
+        // Reiniciar al salir por arriba
+        if (p.y < -0.02) {
+          p.y = 1.02
+          p.x = Math.random()
+        }
+        if (p.x < -0.02) p.x = 1.02
+        if (p.x > 1.02)  p.x = -0.02
+      })
+
+      animId = requestAnimationFrame(draw)
+    }
+    draw()
+
+    return () => {
+      cancelAnimationFrame(animId)
+      window.removeEventListener('resize', resize)
+    }
+  }, [])
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{
+        position: 'absolute', inset: 0,
+        width: '100%', height: '100%',
+        pointerEvents: 'none', zIndex: 1,
+      }}
+    />
+  )
+}
+
 // ── Hero ──────────────────────────────────────────────────────────────────────
 function Hero({ navigate }) {
   const [mounted, setMounted] = useState(false)
@@ -217,6 +303,9 @@ function Hero({ navigate }) {
 
   return (
     <section style={{ height: '100vh', background: '#0D0C0A', position: 'relative', overflow: 'hidden' }}>
+      {/* Particles */}
+      <Particles />
+
       {/* Blobs */}
       <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
         <div style={{ position:'absolute', width:'65%', height:'68%', top:'-10%', right:'-14%', background:'radial-gradient(ellipse, rgba(139,126,110,.44) 0%, rgba(107,103,96,.16) 42%, transparent 70%)', animation:'lpkBlob1 13s ease-in-out infinite', willChange:'transform' }} />
