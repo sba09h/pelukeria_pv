@@ -29,7 +29,8 @@ const KEYFRAMES = `
 `
 
 // ── Logo ──────────────────────────────────────────────────────────────────────
-function LPKLogo({ size = 40, onClick, invert = false }) {
+// mode: 'dark' = blanco sobre fondo oscuro (screen blend), 'light' = logo normal
+function LPKLogo({ size = 40, onClick, mode = 'dark' }) {
   return (
     <img
       src="/logo.webp"
@@ -40,12 +41,13 @@ function LPKLogo({ size = 40, onClick, invert = false }) {
         width: 'auto',
         objectFit: 'contain',
         cursor: onClick ? 'pointer' : 'default',
-        filter: invert ? 'invert(1)' : 'none',
-        opacity: 0.95,
+        mixBlendMode: mode === 'dark' ? 'screen' : 'normal',
+        filter: mode === 'light' ? 'invert(1)' : 'none',
+        opacity: mode === 'dark' ? 1 : 0.9,
         transition: 'opacity 200ms ease',
       }}
-      onMouseEnter={e => { if (onClick) e.currentTarget.style.opacity = '0.75' }}
-      onMouseLeave={e => { if (onClick) e.currentTarget.style.opacity = '0.95' }}
+      onMouseEnter={e => { if (onClick) e.currentTarget.style.opacity = '0.65' }}
+      onMouseLeave={e => { if (onClick) e.currentTarget.style.opacity = mode === 'dark' ? '1' : '0.9' }}
     />
   )
 }
