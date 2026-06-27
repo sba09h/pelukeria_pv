@@ -124,7 +124,7 @@ export default function Login() {
             </div>
           </div>
           <div className="w-10 h-px bg-brand-400/40" style={fu(0.62)} />
-          <p style={{ fontFamily: 'var(--font-body)', fontSize: '9px', letterSpacing: '0.32em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.28)', fontWeight: 500, ...fu(0.72) }}>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: '11.7px', letterSpacing: '0.32em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.28)', fontWeight: 500, ...fu(0.72) }}>
             Sistema interno de gestión
           </p>
         </div>
