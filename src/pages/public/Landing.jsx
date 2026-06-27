@@ -200,6 +200,99 @@ function Footer({ navigate }) {
 }
 
 
+// ── Hero background — orbs cálidos en canvas ─────────────────────────────────
+function HeroBg() {
+  const canvasRef = useRef(null)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+
+    const resize = () => { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight }
+    resize()
+    window.addEventListener('resize', resize)
+
+    // Orbs: posición, tamaño, color y movimiento distintos
+    const orbs = [
+      { x:.72, y:-.06, r:.64, col:[148,128,96],  op:.46, spd:14, ph:0   },  // ámbar cálido
+      { x:-.08,y:.90,  r:.58, col:[88, 72, 52],  op:.52, spd:19, ph:2.1 },  // tierra oscura
+      { x:.48, y:.38,  r:.42, col:[192,168,128], op:.14, spd:24, ph:4.4 },  // beige suave
+      { x:.88, y:.62,  r:.38, col:[168,118,60],  op:.22, spd:16, ph:1.5 },  // cobre
+      { x:.18, y:.18,  r:.34, col:[104,86,62],   op:.18, spd:21, ph:3.2 },  // marrón
+    ]
+
+    // Offscreen grain canvas
+    let grainCanvas, grainCtx, grainFrame = 0
+    grainCanvas = document.createElement('canvas')
+    grainCanvas.width  = 256
+    grainCanvas.height = 256
+    grainCtx = grainCanvas.getContext('2d')
+
+    const updateGrain = () => {
+      const id = grainCtx.createImageData(256, 256)
+      const d  = id.data
+      for (let i = 0; i < d.length; i += 4) {
+        const v = Math.random() * 255 | 0
+        d[i] = d[i+1] = d[i+2] = v
+        d[i+3] = Math.random() * 18 | 0   // muy baja opacidad
+      }
+      grainCtx.putImageData(id, 0, 0)
+    }
+    updateGrain()
+
+    let t = 0, animId
+    const draw = () => {
+      const W = canvas.width, H = canvas.height
+      ctx.clearRect(0, 0, W, H)
+
+      orbs.forEach(o => {
+        const px = (o.x + Math.sin(t / o.spd       + o.ph) * .09) * W
+        const py = (o.y + Math.cos(t / o.spd * .65 + o.ph) * .07) * H
+        const rad = o.r * Math.max(W, H) * .72
+
+        ctx.save()
+        // Aplana el orb verticalmente para dar forma elíptica
+        ctx.translate(px, py)
+        ctx.scale(1, .72)
+        const g = ctx.createRadialGradient(0, 0, 0, 0, 0, rad)
+        const [r, g_, b] = o.col
+        g.addColorStop(0,    `rgba(${r},${g_},${b},${o.op})`)
+        g.addColorStop(.38,  `rgba(${r},${g_},${b},${(o.op * .38).toFixed(3)})`)
+        g.addColorStop(1,    `rgba(${r},${g_},${b},0)`)
+        ctx.beginPath()
+        ctx.arc(0, 0, rad, 0, Math.PI * 2)
+        ctx.fillStyle = g
+        ctx.fill()
+        ctx.restore()
+      })
+
+      // Grain refresh cada 3 frames para efecto de película
+      grainFrame++
+      if (grainFrame % 3 === 0) updateGrain()
+      ctx.save()
+      ctx.globalAlpha = .55
+      ctx.globalCompositeOperation = 'soft-light'
+      const pat = ctx.createPattern(grainCanvas, 'repeat')
+      if (pat) { ctx.fillStyle = pat; ctx.fillRect(0, 0, W, H) }
+      ctx.restore()
+
+      t += .6
+      animId = requestAnimationFrame(draw)
+    }
+    draw()
+
+    return () => { cancelAnimationFrame(animId); window.removeEventListener('resize', resize) }
+  }, [])
+
+  return (
+    <canvas ref={canvasRef} style={{
+      position:'absolute', inset:0, width:'100%', height:'100%',
+      pointerEvents:'none', zIndex:0,
+    }}/>
+  )
+}
+
 // ── Floating particles ────────────────────────────────────────────────────────
 function Particles() {
   const canvasRef = useRef(null)
@@ -220,8 +313,8 @@ function Particles() {
     const particles = Array.from({ length: 60 }, () => ({
       x:       Math.random(),           // 0-1 normalizado
       y:       Math.random(),
-      r:       Math.random() * 1.3 + 0.3,            // radio 0.3–1.6 px
-      opacity: Math.random() * 0.26 + 0.05,          // 0.05–0.31
+      r:       Math.random() * 2.4 + 0.8,            // radio 0.8–3.2 px
+      opacity: Math.random() * 0.45 + 0.12,          // 0.12–0.57
       vy:      -(Math.random() * 0.25 + 0.08),       // sube lento
       vx:      (Math.random() - 0.5) * 0.12,         // leve deriva horizontal
       warm:    Math.random(),                          // 0=blanco, 1=dorado suave
@@ -286,7 +379,7 @@ function Particles() {
   )
 }
 
-// ── Hero ──────────────────────────────────────────────────────────────────────
+// ── Hero ──────────────────────────────────────────────────────────────────────────────────────────
 function Hero({ navigate }) {
   const [mounted, setMounted] = useState(false)
 
@@ -303,24 +396,27 @@ function Hero({ navigate }) {
 
   return (
     <section style={{ height: '100vh', background: '#0D0C0A', position: 'relative', overflow: 'hidden' }}>
-      {/* Particles */}
+      {/* Fondo animado — orbs cálidos + grain */}
+      <HeroBg />
+
+      {/* Partículas flotantes */}
       <Particles />
 
-      {/* Blobs */}
-      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-        <div style={{ position:'absolute', width:'65%', height:'68%', top:'-10%', right:'-14%', background:'radial-gradient(ellipse, rgba(139,126,110,.44) 0%, rgba(107,103,96,.16) 42%, transparent 70%)', animation:'lpkBlob1 13s ease-in-out infinite', willChange:'transform' }} />
-        <div style={{ position:'absolute', width:'56%', height:'58%', bottom:'-10%', left:'-14%', background:'radial-gradient(ellipse, rgba(80,72,60,.52) 0%, rgba(61,59,55,.2) 42%, transparent 70%)', animation:'lpkBlob2 18s ease-in-out infinite', willChange:'transform' }} />
-        <div style={{ position:'absolute', width:'38%', height:'38%', top:'30%', left:'36%', background:'radial-gradient(ellipse, rgba(176,162,145,.15) 0%, transparent 70%)', animation:'lpkBlob3 22s ease-in-out infinite' }} />
+      {/* Overlays: grid + viñetas */}
+      <div style={{ position:'absolute', inset:0, pointerEvents:'none', zIndex:2 }}>
         {/* Pixel grid */}
-        <div style={{ position:'absolute', inset:0, backgroundImage:'linear-gradient(rgba(255,255,255,.016) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.016) 1px, transparent 1px)', backgroundSize:'80px 80px' }} />
-        {/* Vignettes */}
-        <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, transparent 35%, rgba(10,9,8,.82) 100%)' }} />
-        <div style={{ position:'absolute', inset:0, background:'linear-gradient(to right, rgba(10,9,8,.32) 0%, transparent 50%)' }} />
+        <div style={{ position:'absolute', inset:0, backgroundImage:'linear-gradient(rgba(255,255,255,.014) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.014) 1px, transparent 1px)', backgroundSize:'80px 80px' }} />
+        {/* Viñeta inferior — oscurece para leer el texto */}
+        <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, transparent 28%, rgba(10,9,8,.88) 100%)' }} />
+        {/* Viñeta lateral izquierda */}
+        <div style={{ position:'absolute', inset:0, background:'linear-gradient(to right, rgba(10,9,8,.38) 0%, transparent 55%)' }} />
+        {/* Viñeta superior */}
+        <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, rgba(10,9,8,.45) 0%, transparent 22%)' }} />
       </div>
 
       {/* Scan line */}
       {mounted && (
-        <div style={{ position:'absolute', top:'38%', left:0, right:0, height:'1px', background:'linear-gradient(to right, transparent 0%, rgba(255,255,255,.055) 25%, rgba(255,255,255,.055) 75%, transparent 100%)', transformOrigin:'left center', animation:'lpkLineDraw 2s cubic-bezier(.16,1,.3,1) .1s both', pointerEvents:'none' }} />
+        <div style={{ position:'absolute', top:'38%', left:0, right:0, height:'1px', zIndex:3, background:'linear-gradient(to right, transparent 0%, rgba(255,255,255,.042) 25%, rgba(255,255,255,.042) 75%, transparent 100%)', transformOrigin:'left center', animation:'lpkLineDraw 2s cubic-bezier(.16,1,.3,1) .1s both', pointerEvents:'none' }} />
       )}
 
 
