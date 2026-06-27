@@ -41,9 +41,9 @@ function LPKLogo({ size = 40, onClick, mode = 'dark' }) {
         width: 'auto',
         objectFit: 'contain',
         cursor: onClick ? 'pointer' : 'default',
-        mixBlendMode: mode === 'dark' ? 'screen' : 'normal',
-        filter: mode === 'dark' ? 'contrast(8) brightness(1.4)' : mode === 'light' ? 'invert(1)' : 'none',
-        opacity: mode === 'dark' ? 1 : 0.9,
+        mixBlendMode: 'normal',
+        filter: 'none',
+        opacity: mode === 'dark' ? 0.95 : 0.85,
         transition: 'opacity 200ms ease',
       }}
       onMouseEnter={e => { if (onClick) e.currentTarget.style.opacity = '0.65' }}
