@@ -42,7 +42,7 @@ function LPKLogo({ size = 40, onClick, mode = 'dark' }) {
         objectFit: 'contain',
         cursor: onClick ? 'pointer' : 'default',
         mixBlendMode: mode === 'dark' ? 'screen' : 'normal',
-        filter: mode === 'light' ? 'invert(1)' : 'none',
+        filter: mode === 'dark' ? 'contrast(8) brightness(1.4)' : mode === 'light' ? 'invert(1)' : 'none',
         opacity: mode === 'dark' ? 1 : 0.9,
         transition: 'opacity 200ms ease',
       }}
