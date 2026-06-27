@@ -53,7 +53,6 @@ function LPKLogo({ size = 40, onClick, invert = false }) {
 // ── Navbar ────────────────────────────────────────────────────────────────────
 function Navbar({ currentPage, navigate }) {
   const [scrolled, setScrolled] = useState(false)
-  const [btnHov,   setBtnHov]   = useState(false)
   const [adminHov, setAdminHov] = useState(false)
 
   useEffect(() => {
@@ -67,9 +66,9 @@ function Navbar({ currentPage, navigate }) {
   const isHome = currentPage === 'home'
   const dark   = isHome && !scrolled
 
-  const fg      = dark ? 'rgba(255,255,255,0.9)' : 'var(--color-black)'
-  const fgMuted = dark ? 'rgba(255,255,255,0.45)' : 'var(--text-secondary)'
-  const activeBdr = dark ? 'rgba(255,255,255,0.7)' : 'var(--color-black)'
+  const fg      = dark ? 'rgba(255,255,255,0.88)' : 'var(--color-black)'
+  const fgMuted = dark ? 'rgba(255,255,255,0.42)' : 'var(--text-secondary)'
+  const activeBdr = dark ? 'rgba(255,255,255,0.6)' : 'var(--color-black)'
 
   const links = [
     { key: 'home',     label: 'Inicio',    path: '/'          },
@@ -80,55 +79,75 @@ function Navbar({ currentPage, navigate }) {
   return (
     <nav style={{
       position: isHome ? 'fixed' : 'sticky',
-      top: 0, left: 0, right: 0, zIndex: 100,
-      height: 'var(--navbar-height)',
+      top: isHome ? '18px' : 0,
+      left: isHome ? '50%' : 0,
+      right: isHome ? 'auto' : 0,
+      transform: isHome ? 'translateX(-50%)' : 'none',
+      width: isHome ? 'calc(100% - 80px)' : '100%',
+      maxWidth: isHome ? '1200px' : 'none',
+      zIndex: 100,
+      height: '56px',
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      padding: '0 48px',
-      background: dark ? 'rgba(13,12,10,0.28)' : 'rgba(255,255,255,0.94)',
-      backdropFilter: 'blur(22px)',
-      WebkitBackdropFilter: 'blur(22px)',
-      borderBottom: dark ? '1px solid rgba(255,255,255,0.07)' : '1px solid var(--border-default)',
-      transition: 'background 420ms ease, border-color 420ms ease',
+      padding: '0 28px',
+      background: dark
+        ? 'rgba(13,12,10,0.38)'
+        : 'rgba(255,255,255,0.92)',
+      backdropFilter: 'blur(28px) saturate(1.4)',
+      WebkitBackdropFilter: 'blur(28px) saturate(1.4)',
+      borderRadius: isHome ? '14px' : '0',
+      border: dark
+        ? '1px solid rgba(255,255,255,0.09)'
+        : '1px solid rgba(0,0,0,0.08)',
+      boxShadow: dark
+        ? '0 4px 32px rgba(0,0,0,0.32), inset 0 1px 0 rgba(255,255,255,0.06)'
+        : '0 2px 20px rgba(0,0,0,0.08)',
+      transition: 'background 420ms ease, border-color 420ms ease, top 420ms ease, border-radius 420ms ease, box-shadow 420ms ease',
     }}>
-      <LPKLogo size={42} onClick={() => navigate('/')} />
+      <LPKLogo size={38} onClick={() => navigate('/')} />
 
       {/* Nav links */}
-      <div style={{ display: 'flex', gap: '40px' }}>
+      <div style={{ display: 'flex', gap: '36px' }}>
         {links.map(link => {
           const active = currentPage === link.key
           return (
             <button key={link.key} onClick={() => navigate(link.path)} style={{
-              fontFamily: 'var(--font-body)', fontSize: 'var(--text-xs)', fontWeight: 500,
-              letterSpacing: 'var(--ls-wider)', textTransform: 'uppercase',
+              fontFamily: 'var(--font-body)', fontSize: '10px', fontWeight: 500,
+              letterSpacing: '0.2em', textTransform: 'uppercase',
               color: active ? fg : fgMuted,
               background: 'none', border: 'none',
               borderBottom: active ? `1px solid ${activeBdr}` : '1px solid transparent',
               paddingBottom: '2px', cursor: 'pointer',
               transition: 'color 300ms ease, border-color 300ms ease',
-            }}>
+            }}
+            onMouseEnter={e => { if (!active) e.currentTarget.style.color = fg }}
+            onMouseLeave={e => { if (!active) e.currentTarget.style.color = fgMuted }}>
               {link.label}
             </button>
           )
         })}
       </div>
 
-      {/* Right side: solo Acceso equipo */}
+      {/* Acceso equipo */}
       <button
         onMouseEnter={() => setAdminHov(true)}
         onMouseLeave={() => setAdminHov(false)}
         onClick={() => navigate('/login')}
         style={{
-          fontFamily: 'var(--font-body)', fontSize: '8px', fontWeight: 500,
+          fontFamily: 'var(--font-body)', fontSize: '9px', fontWeight: 600,
           letterSpacing: '0.18em', textTransform: 'uppercase',
-          color: dark
-            ? (adminHov ? 'rgba(255,255,255,0.7)' : 'rgba(255,255,255,0.25)')
-            : (adminHov ? 'var(--color-black)' : 'var(--text-muted)'),
-          background: 'none', border: 'none', cursor: 'pointer',
-          transition: 'color 250ms ease',
-          display: 'flex', alignItems: 'center', gap: '4px',
+          color: dark ? 'rgba(255,255,255,0.88)' : 'var(--color-black)',
+          background: dark
+            ? (adminHov ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.08)')
+            : (adminHov ? 'rgba(0,0,0,0.08)' : 'rgba(0,0,0,0.04)'),
+          border: dark ? '1px solid rgba(255,255,255,0.14)' : '1px solid rgba(0,0,0,0.1)',
+          borderRadius: '8px',
+          padding: '7px 16px',
+          cursor: 'pointer',
+          transition: 'all 220ms ease',
+          display: 'flex', alignItems: 'center', gap: '5px',
         }}>
         Acceso equipo
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <path d="M7 17L17 7M7 7h10v10"/>
         </svg>
       </button>
@@ -396,32 +415,37 @@ function Hero({ navigate }) {
 
   return (
     <section style={{ height: '100vh', background: '#0D0C0A', position: 'relative', overflow: 'hidden' }}>
-      {/* Fondo animado — orbs cálidos + grain */}
-      <HeroBg />
 
-      {/* Partículas flotantes */}
-      <Particles />
+      {/* Video background */}
+      <video
+        autoPlay muted loop playsInline
+        style={{
+          position: 'absolute', inset: 0,
+          width: '100%', height: '100%',
+          objectFit: 'cover',
+          zIndex: 0,
+        }}
+      >
+        <source src="/hero-bg.mp4" type="video/mp4" />
+      </video>
 
-      {/* Overlays: grid + viñetas */}
-      <div style={{ position:'absolute', inset:0, pointerEvents:'none', zIndex:2 }}>
-        {/* Pixel grid */}
-        <div style={{ position:'absolute', inset:0, backgroundImage:'linear-gradient(rgba(255,255,255,.014) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.014) 1px, transparent 1px)', backgroundSize:'80px 80px' }} />
+      {/* Overlays: color de marca + viñetas */}
+      <div style={{ position:'absolute', inset:0, pointerEvents:'none', zIndex:1 }}>
+        {/* Tinte cálido de marca sobre el video */}
+        <div style={{ position:'absolute', inset:0, background:'rgba(10,8,6,0.42)', mixBlendMode:'multiply' }} />
         {/* Viñeta inferior — oscurece para leer el texto */}
-        <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, transparent 28%, rgba(10,9,8,.88) 100%)' }} />
+        <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, transparent 25%, rgba(8,7,5,.92) 100%)' }} />
         {/* Viñeta lateral izquierda */}
-        <div style={{ position:'absolute', inset:0, background:'linear-gradient(to right, rgba(10,9,8,.38) 0%, transparent 55%)' }} />
+        <div style={{ position:'absolute', inset:0, background:'linear-gradient(to right, rgba(8,7,5,.52) 0%, transparent 60%)' }} />
         {/* Viñeta superior */}
-        <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, rgba(10,9,8,.45) 0%, transparent 22%)' }} />
+        <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, rgba(8,7,5,.55) 0%, transparent 20%)' }} />
+        {/* Pixel grid sutil */}
+        <div style={{ position:'absolute', inset:0, backgroundImage:'linear-gradient(rgba(255,255,255,.01) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.01) 1px, transparent 1px)', backgroundSize:'80px 80px' }} />
       </div>
-
-      {/* Scan line */}
-      {mounted && (
-        <div style={{ position:'absolute', top:'38%', left:0, right:0, height:'1px', zIndex:3, background:'linear-gradient(to right, transparent 0%, rgba(255,255,255,.042) 25%, rgba(255,255,255,.042) 75%, transparent 100%)', transformOrigin:'left center', animation:'lpkLineDraw 2s cubic-bezier(.16,1,.3,1) .1s both', pointerEvents:'none' }} />
-      )}
 
 
       {/* Hero copy */}
-      <div style={{ position:'absolute', bottom:'84px', left:'56px', right:'50%', minWidth:'420px', zIndex:2 }}>
+      <div style={{ position:'absolute', bottom:'84px', left:'56px', right:'50%', minWidth:'420px', zIndex:3 }}>
         <div style={{ fontFamily:'var(--font-body)', fontSize:'9.6px', fontWeight:500, letterSpacing:'0.35em', textTransform:'uppercase', color:'rgba(255,255,255,.36)', marginBottom:'18px', ...fu(0.28) }}>
           Puerto Varas · Chile
         </div>
@@ -452,7 +476,7 @@ function Hero({ navigate }) {
 
       {/* Scroll indicator */}
       {mounted && (
-        <div style={{ position:'absolute', bottom:'28px', left:'50%', display:'flex', flexDirection:'column', alignItems:'center', gap:'8px', animation:'lpkBounce 2.2s ease-in-out 1.4s infinite', zIndex:2 }}>
+        <div style={{ position:'absolute', bottom:'28px', left:'50%', display:'flex', flexDirection:'column', alignItems:'center', gap:'8px', animation:'lpkBounce 2.2s ease-in-out 1.4s infinite', zIndex:3 }}>
           <div style={{ fontFamily:'var(--font-body)', fontSize:'7px', letterSpacing:'0.22em', textTransform:'uppercase', color:'rgba(255,255,255,.17)' }}>Scroll</div>
           <div style={{ width:'1px', height:'36px', background:'linear-gradient(to bottom, rgba(255,255,255,.14), transparent)' }} />
         </div>
