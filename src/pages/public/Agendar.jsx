@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   ChevronRight, ChevronLeft, Check, Clock, Scissors,
   User, Phone, Calendar, Sparkles, ArrowLeft
@@ -14,6 +15,40 @@ import {
 } from '../../lib/mockData'
 import { CategoryBadge } from '../../components/ui/Badge'
 import Logo from '../../components/ui/Logo'
+
+// ── EmailJS config ────────────────────────────────────────────────────────────
+// Crea cuenta gratis en https://emailjs.com y rellena estas 3 constantes:
+const EMAILJS_SERVICE_ID  = import.meta.env.VITE_EMAILJS_SERVICE_ID  || ''
+const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || ''
+const EMAILJS_PUBLIC_KEY  = import.meta.env.VITE_EMAILJS_PUBLIC_KEY  || ''
+
+async function sendConfirmationEmail({ client, service, peluquero, dateTime }) {
+  if (!EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID || !EMAILJS_PUBLIC_KEY) return
+  try {
+    await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        service_id:  EMAILJS_SERVICE_ID,
+        template_id: EMAILJS_TEMPLATE_ID,
+        user_id:     EMAILJS_PUBLIC_KEY,
+        template_params: {
+          to_name:      client.name,
+          to_email:     client.email,
+          service_name: service?.name       || '—',
+          professional: peluquero?.name     || 'Se asignará',
+          date: format(dateTime.date, "EEEE d 'de' MMMM yyyy", { locale: es }),
+          time: `${String(dateTime.hour).padStart(2,'0')}:${String(dateTime.minute).padStart(2,'0')} hrs`,
+          price:   `$${service?.price?.toLocaleString('es-CL') || '—'}`,
+          phone:   `+56 ${client.phone}`,
+          whatsapp: '+56 9 2999 3799',
+        },
+      }),
+    })
+  } catch (e) {
+    console.warn('Email no enviado:', e)
+  }
+}
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 const SLOT_INTERVAL = 30 // minutes
@@ -295,21 +330,14 @@ function StepDateTime({ service, peluqueroId, value, onChange }) {
 }
 
 function StepClientData({ value, onChange }) {
-  const [form, setForm] = useState(value || { name: '', rut: '', phone: '' })
+  const [form, setForm] = useState(value || { name: '', email: '', phone: '' })
   const [errors, setErrors] = useState({})
   const f = k => v => {
     const next = { ...form, [k]: v }
     setForm(next)
     onChange(next)
-  }
-
-  function handleRUT(e) {
-    const formatted = formatRUT(e.target.value)
-    const next = { ...form, rut: formatted }
-    setForm(next)
-    onChange(next)
-    if (formatted.length > 3) {
-      setErrors(p => ({ ...p, rut: validateRUT(formatted) ? '' : 'RUT inválido' }))
+    if (k === 'email') {
+      setErrors(p => ({ ...p, email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? '' : 'Correo inválido' }))
     }
   }
 
@@ -325,15 +353,15 @@ function StepClientData({ value, onChange }) {
         />
       </div>
       <div>
-        <label className="block text-xs font-medium text-dark-600 mb-1.5">RUT *</label>
+        <label className="block text-xs font-medium text-dark-600 mb-1.5">Correo electrónico *</label>
         <input
-          className={`input ${errors.rut ? 'border-red-400 focus:ring-red-300' : ''}`}
-          placeholder="12.345.678-9"
-          value={form.rut}
-          onChange={handleRUT}
-          maxLength={12}
+          type="email"
+          className={`input ${errors.email ? 'border-red-400 focus:ring-red-300' : ''}`}
+          placeholder="maria@email.com"
+          value={form.email}
+          onChange={e => f('email')(e.target.value)}
         />
-        {errors.rut && <p className="text-xs text-red-500 mt-1">{errors.rut}</p>}
+        {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
       </div>
       <div>
         <label className="block text-xs font-medium text-dark-600 mb-1.5">Teléfono *</label>
@@ -356,6 +384,24 @@ function StepClientData({ value, onChange }) {
 }
 
 function StepConfirmation({ booking }) {
+  const navigate  = useNavigate()
+  const [secs, setSecs] = useState(5)
+  const emailSent = useRef(false)
+
+  // Enviar email de confirmación (una sola vez)
+  useEffect(() => {
+    if (emailSent.current) return
+    emailSent.current = true
+    sendConfirmationEmail(booking)
+  }, [])
+
+  // Countdown → redirect al home
+  useEffect(() => {
+    if (secs <= 0) { navigate('/'); return }
+    const t = setTimeout(() => setSecs(s => s - 1), 1000)
+    return () => clearTimeout(t)
+  }, [secs, navigate])
+
   return (
     <div className="text-center space-y-6">
       {/* Success icon */}
@@ -370,19 +416,26 @@ function StepConfirmation({ booking }) {
 
       {/* Booking details card */}
       <div className="bg-dark-50 rounded-2xl p-5 text-left space-y-3 max-w-sm mx-auto">
-        <DetailRow icon={<Scissors size={15} />} label="Servicio" value={booking.service?.name} />
+        <DetailRow icon={<Scissors size={15} />} label="Servicio"    value={booking.service?.name} />
         <DetailRow icon={<User size={15} />}     label="Profesional"
           value={booking.peluquero ? booking.peluquero.name : 'Sin preferencia (se asignará)'} />
         <DetailRow icon={<Calendar size={15} />} label="Fecha"
           value={format(booking.dateTime.date, "EEEE d 'de' MMMM yyyy", { locale: es })} />
         <DetailRow icon={<Clock size={15} />}    label="Hora"
           value={`${String(booking.dateTime.hour).padStart(2,'0')}:${String(booking.dateTime.minute).padStart(2,'0')} hrs`} />
-        <DetailRow icon={<Phone size={15} />}    label="Contacto" value={`+56 ${booking.client.phone}`} />
+        <DetailRow icon={<Phone size={15} />}    label="Contacto"   value={`+56 ${booking.client.phone}`} />
         <div className="border-t border-dark-200 pt-3 flex justify-between items-center">
           <span className="text-xs text-dark-500">Precio estimado</span>
           <span className="font-semibold text-dark-900">${booking.service?.price?.toLocaleString('es-CL')}</span>
         </div>
       </div>
+
+      {/* Email notice */}
+      {booking.client?.email && (
+        <p className="text-xs text-dark-400">
+          📧 Enviamos un comprobante a <span className="text-dark-600 font-medium">{booking.client.email}</span>
+        </p>
+      )}
 
       <div className="text-xs text-dark-400 space-y-1">
         <p>📍 <strong className="text-dark-600">La Pelukeria</strong> · Puerto Varas, Chile</p>
@@ -392,12 +445,19 @@ function StepConfirmation({ booking }) {
         </a>
       </div>
 
-      <button
-        className="btn-secondary mx-auto"
-        onClick={() => window.location.reload()}
-      >
-        Agendar otra cita
-      </button>
+      {/* Redirect countdown */}
+      <p className="text-xs text-dark-300">
+        Volviendo al inicio en <span className="font-semibold text-dark-500">{secs}s</span>…
+      </p>
+
+      <div className="flex gap-3 justify-center">
+        <button className="btn-secondary" onClick={() => navigate('/')}>
+          Ir al inicio
+        </button>
+        <button className="btn-secondary" onClick={() => window.location.reload()}>
+          Agendar otra cita
+        </button>
+      </div>
     </div>
   )
 }
@@ -437,7 +497,7 @@ export default function Agendar() {
     if (step === 1) return !!service
     if (step === 2) return peluquero !== undefined
     if (step === 3) return !!dateTime
-    if (step === 4) return !!(client?.name && client?.rut && client?.phone && validateRUT(client.rut))
+    if (step === 4) return !!(client?.name && client?.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(client.email) && client?.phone)
     return true
   }, [step, service, peluquero, dateTime, client])
 
@@ -547,7 +607,7 @@ function ReviewStep({ service, peluquero, dateTime, client }) {
       <ReviewRow label="Hora"
         value={dateTime ? `${String(dateTime.hour).padStart(2,'0')}:${String(dateTime.minute).padStart(2,'0')} hrs` : '—'} />
       <ReviewRow label="Nombre"    value={client?.name} />
-      <ReviewRow label="RUT"       value={client?.rut} />
+      <ReviewRow label="Correo"    value={client?.email} />
       <ReviewRow label="Teléfono"  value={client?.phone ? `+56 ${client.phone}` : '—'} />
       <div className="flex justify-between items-center p-4 bg-dark-900 text-white rounded-xl mt-2">
         <span className="text-sm">Total estimado</span>
