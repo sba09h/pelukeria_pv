@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react'
 import {
   Gift, Star, TrendingUp, Users, Settings,
   Plus, Minus, Check, Edit2, Save, X,
-  ChevronRight, Search, ArrowUpRight, ArrowDownRight
+  ChevronRight, Search, ArrowUpRight, ArrowDownRight, Sparkles, AlertTriangle
 } from 'lucide-react'
 import { format, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -139,6 +139,97 @@ function AdjustModal({ client, onSave, onClose }) {
   )
 }
 
+// ── Redeem Modal ──────────────────────────────────────────────────────────────
+function RedeemModal({ client, config, onConfirm, onClose }) {
+  const [step, setStep] = useState(1) // 1: show benefit | 2: confirm
+
+  // Highest unlocked level
+  const unlockedLevels = config.levels.filter(l => client.loyalty_points >= l.points)
+  const benefit = unlockedLevels[unlockedLevels.length - 1]
+
+  if (!benefit) return null
+
+  return (
+    <div className="space-y-5">
+      {step === 1 && (
+        <>
+          {/* Client info */}
+          <div className="p-4 bg-dark-50 rounded-xl flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-brand-100 flex items-center justify-center text-sm font-serif text-brand-700">
+                {client.name.charAt(0)}
+              </div>
+              <div>
+                <p className="text-sm font-medium text-dark-900">{client.name}</p>
+                <p className="text-xs text-dark-400">{client.rut}</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-dark-400">Saldo</p>
+              <p className="font-semibold text-dark-900 flex items-center gap-1">
+                <Star size={12} className="text-brand-500" fill="currentColor"/>
+                {client.loyalty_points} pts
+              </p>
+            </div>
+          </div>
+
+          {/* Benefit highlight */}
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-50 to-brand-50 border border-amber-200 p-5 text-center">
+            <div className="absolute -top-4 -right-4 w-24 h-24 rounded-full bg-amber-100/60" />
+            <div className="relative">
+              <div className="w-12 h-12 rounded-2xl bg-amber-100 border border-amber-200 flex items-center justify-center mx-auto mb-3">
+                <Gift size={22} className="text-amber-600" />
+              </div>
+              <p className="text-xs font-semibold text-amber-600 uppercase tracking-widest mb-1">Beneficio desbloqueado</p>
+              <p className="text-xl font-semibold text-dark-900">{benefit.reward}</p>
+              <p className="text-xs text-dark-400 mt-1">Alcanzado con {benefit.points} pts</p>
+            </div>
+          </div>
+
+          <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-2">
+            <AlertTriangle size={13} className="text-amber-600 mt-0.5 flex-shrink-0" />
+            <p className="text-xs text-amber-700">
+              Al confirmar el canje, los puntos del cliente se reiniciarán a <strong>0</strong> y quedará registrado en el historial.
+            </p>
+          </div>
+
+          <div className="flex gap-2">
+            <button className="btn-secondary flex-1" onClick={onClose}>Cancelar</button>
+            <button className="btn-primary flex-1 flex items-center justify-center gap-1.5"
+              onClick={() => setStep(2)}>
+              <Sparkles size={14}/> Aplicar beneficio
+            </button>
+          </div>
+        </>
+      )}
+
+      {step === 2 && (
+        <>
+          <div className="text-center py-4">
+            <div className="w-16 h-16 rounded-full bg-green-100 border-2 border-green-300 flex items-center justify-center mx-auto mb-4">
+              <Check size={28} className="text-green-600" />
+            </div>
+            <p className="text-base font-semibold text-dark-900">¿Confirmar canje?</p>
+            <p className="text-sm text-dark-500 mt-1">
+              Se aplicará <strong>{benefit.reward}</strong> a <strong>{client.name}</strong>
+            </p>
+            <p className="text-xs text-dark-400 mt-2">Sus puntos ({client.loyalty_points} pts) quedarán en 0</p>
+          </div>
+
+          <div className="flex gap-2">
+            <button className="btn-secondary flex-1" onClick={() => setStep(1)}>Atrás</button>
+            <button
+              className="flex-1 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-1.5"
+              onClick={() => onConfirm(client.id, benefit)}>
+              <Check size={15}/> Confirmar canje
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
 // ── Config Editor ─────────────────────────────────────────────────────────────
 function ConfigPanel({ config, onSave }) {
   const [cfg, setCfg]         = useState(config)
@@ -242,11 +333,14 @@ export default function Loyalty() {
   const [clients, setClients] = useState(MOCK_CLIENTS)
   const [config,  setConfig]  = useState(LOYALTY_CONFIG)
   const [search,  setSearch]  = useState('')
-  const [adjusting, setAdjusting] = useState(null)
+  const [adjusting,  setAdjusting]  = useState(null)
+  const [redeeming,  setRedeeming]  = useState(null)
+  const [manualTxns, setManualTxns] = useState([])
   const [tab, setTab] = useState('overview')
 
-  // Transactions history (derived from visits + mock adjustments)
+  // Transactions history (derived from visits + manual adjustments + redemptions)
   const transactions = useMemo(() => [
+    ...manualTxns,
     ...MOCK_VISITS.flatMap(v => {
       const client = MOCK_CLIENTS.find(c => c.id === v.client_id)
       const items  = []
@@ -277,10 +371,37 @@ export default function Loyalty() {
   }, [clients, search])
 
   function handleAdjust(clientId, delta, reason) {
+    const client = clients.find(c => c.id === clientId)
     setClients(prev => prev.map(c =>
       c.id === clientId ? { ...c, loyalty_points: Math.max(0, c.loyalty_points + delta) } : c
     ))
+    setManualTxns(prev => [{
+      id: `m-${Date.now()}`,
+      client_id: clientId,
+      client_name: client?.name,
+      type: delta > 0 ? 'earned' : 'redeemed',
+      points: delta,
+      date: new Date().toISOString().split('T')[0],
+      reason,
+    }, ...prev])
     setAdjusting(null)
+  }
+
+  function handleRedeem(clientId, benefit) {
+    const client = clients.find(c => c.id === clientId)
+    setClients(prev => prev.map(c =>
+      c.id === clientId ? { ...c, loyalty_points: 0 } : c
+    ))
+    setManualTxns(prev => [{
+      id: `r-${Date.now()}`,
+      client_id: clientId,
+      client_name: client?.name,
+      type: 'redeemed',
+      points: -(client?.loyalty_points || 0),
+      date: new Date().toISOString().split('T')[0],
+      reason: `Canje: ${benefit.reward}`,
+    }, ...prev])
+    setRedeeming(null)
   }
 
   return (
@@ -397,10 +518,18 @@ export default function Loyalty() {
                       </td>
                       <td className="px-4 py-3">
                         {isAdmin && (
-                          <button onClick={() => setAdjusting(c)}
-                            className="text-xs px-3 py-1.5 rounded-lg border border-dark-200 hover:bg-dark-50 transition-colors text-dark-600">
-                            Ajustar
-                          </button>
+                          <div className="flex items-center gap-2">
+                            {c.loyalty_points >= (config.levels[0]?.points || Infinity) && (
+                              <button onClick={() => setRedeeming(c)}
+                                className="text-xs px-3 py-1.5 rounded-lg bg-amber-50 border border-amber-300 text-amber-700 hover:bg-amber-100 transition-colors flex items-center gap-1 font-medium">
+                                <Gift size={11}/> Canjear
+                              </button>
+                            )}
+                            <button onClick={() => setAdjusting(c)}
+                              className="text-xs px-3 py-1.5 rounded-lg border border-dark-200 hover:bg-dark-50 transition-colors text-dark-600">
+                              Ajustar
+                            </button>
+                          </div>
                         )}
                       </td>
                     </tr>
@@ -459,6 +588,29 @@ export default function Loyalty() {
       {/* CONFIG TAB */}
       {tab === 'config' && isAdmin && (
         <ConfigPanel config={config} onSave={setConfig} />
+      )}
+
+      {/* Redeem Modal */}
+      {redeeming && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setRedeeming(null)}/>
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-base font-semibold flex items-center gap-2">
+                <Gift size={16} className="text-amber-500"/> Canjear beneficio
+              </h2>
+              <button onClick={() => setRedeeming(null)} className="p-1.5 rounded-lg hover:bg-dark-50">
+                <X size={15} className="text-dark-400"/>
+              </button>
+            </div>
+            <RedeemModal
+              client={redeeming}
+              config={config}
+              onConfirm={handleRedeem}
+              onClose={() => setRedeeming(null)}
+            />
+          </div>
+        </div>
       )}
 
       {/* Adjust Modal */}

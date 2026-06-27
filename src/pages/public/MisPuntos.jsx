@@ -6,13 +6,7 @@ import { MOCK_CLIENTS, MOCK_VISITS, LOYALTY_CONFIG } from '../../lib/mockData'
 import Logo from '../../components/ui/Logo'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-function formatRUT(value) {
-  const clean = value.replace(/[^0-9kK]/g, '').toUpperCase()
-  if (clean.length <= 1) return clean
-  const dv   = clean.slice(-1)
-  const body = clean.slice(0, -1).replace(/\B(?=(\d{3})+(?!\d))/g, '.')
-  return `${body}-${dv}`
-}
+function isValidEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) }
 
 function loyaltyLevel(points) {
   const rev = [...LOYALTY_CONFIG.levels].reverse()
@@ -72,7 +66,7 @@ function LoyaltyCardVisual({ client }) {
               : '¡Nivel máximo alcanzado!'
             }
           </p>
-          <p className="text-[10px] text-white/30 font-mono">{client.rut}</p>
+          <p className="text-[10px] text-white/30 font-mono">{client.email}</p>
         </div>
       </div>
     </div>
@@ -81,17 +75,16 @@ function LoyaltyCardVisual({ client }) {
 
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export default function MisPuntos() {
-  const [rut,    setRut]    = useState('')
-  const [result, setResult] = useState(null)  // null | 'not_found' | client
+  const [email,   setEmail]   = useState('')
+  const [result,  setResult]  = useState(null)  // null | 'not_found' | client
   const [loading, setLoading] = useState(false)
 
   function handleSearch(e) {
     e.preventDefault()
     setLoading(true)
     setTimeout(() => {
-      const clean = rut.replace(/[.\-]/g, '').toUpperCase()
       const found = MOCK_CLIENTS.find(c =>
-        c.rut.replace(/[.\-]/g, '').toUpperCase() === clean
+        c.email?.toLowerCase() === email.trim().toLowerCase()
       )
       setResult(found || 'not_found')
       setLoading(false)
@@ -121,7 +114,7 @@ export default function MisPuntos() {
             <Star size={24} className="text-brand-400" fill="currentColor" />
           </div>
           <h1 className="font-serif text-3xl text-white font-light">Mis Puntos</h1>
-          <p className="text-white/40 text-sm mt-2">Ingresa tu RUT para ver tu saldo y beneficios</p>
+          <p className="text-white/40 text-sm mt-2">Ingresa tu correo para ver tu saldo y beneficios</p>
         </div>
 
         {/* Search form */}
@@ -130,16 +123,16 @@ export default function MisPuntos() {
             <div className="relative">
               <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" />
               <input
+                type="email"
                 className="w-full bg-white/5 border border-white/10 rounded-xl pl-11 pr-4 py-3.5 text-white placeholder-white/30 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent transition-all"
-                placeholder="12.345.678-9"
-                value={rut}
-                onChange={e => setRut(formatRUT(e.target.value))}
-                maxLength={12}
+                placeholder="maria@email.com"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
               />
             </div>
             <button
               type="submit"
-              disabled={rut.length < 5 || loading}
+              disabled={!isValidEmail(email) || loading}
               className="w-full py-3.5 bg-brand-400 text-white rounded-xl text-sm font-medium hover:bg-brand-500 transition-colors disabled:opacity-50"
             >
               {loading ? 'Buscando…' : 'Ver mis puntos'}
@@ -151,17 +144,17 @@ export default function MisPuntos() {
         {result === 'not_found' && (
           <div className="text-center space-y-4">
             <div className="p-6 bg-white/5 border border-white/10 rounded-2xl">
-              <p className="text-white/60 text-sm">No encontramos una cuenta asociada al RUT</p>
-              <p className="text-white font-mono mt-1">{rut}</p>
+              <p className="text-white/60 text-sm">No encontramos una cuenta asociada al correo</p>
+              <p className="text-white font-mono mt-1 text-sm break-all">{email}</p>
               <p className="text-white/40 text-xs mt-3">
                 ¿Primera visita? Consulta en recepción para activar tu Loyalty Card.
               </p>
             </div>
             <button
-              onClick={() => { setResult(null); setRut('') }}
+              onClick={() => { setResult(null); setEmail('') }}
               className="text-brand-400 text-sm hover:underline"
             >
-              Intentar con otro RUT
+              Intentar con otro correo
             </button>
           </div>
         )}
@@ -248,7 +241,7 @@ export default function MisPuntos() {
                 onClick={() => { setResult(null); setRut('') }}
                 className="text-white/30 text-xs hover:text-white/50 transition-colors"
               >
-                Consultar otro RUT
+                Consultar otro correo
               </button>
             </div>
           </div>
