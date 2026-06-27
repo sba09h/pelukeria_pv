@@ -135,21 +135,17 @@ function Navbar({ currentPage, navigate }) {
         onMouseLeave={() => setAdminHov(false)}
         onClick={() => navigate('/login')}
         style={{
-          fontFamily: 'var(--font-body)', fontSize: '9px', fontWeight: 600,
+          fontFamily: 'var(--font-body)', fontSize: '9px', fontWeight: 500,
           letterSpacing: '0.18em', textTransform: 'uppercase',
-          color: dark ? 'rgba(255,255,255,0.88)' : 'var(--color-black)',
-          background: dark
-            ? (adminHov ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.08)')
-            : (adminHov ? 'rgba(0,0,0,0.08)' : 'rgba(0,0,0,0.04)'),
-          border: dark ? '1px solid rgba(255,255,255,0.14)' : '1px solid rgba(0,0,0,0.1)',
-          borderRadius: '8px',
-          padding: '7px 16px',
+          color: dark ? 'rgba(255,255,255,0.28)' : 'rgba(0,0,0,0.3)',
+          opacity: adminHov ? 1 : 0.7,
+          background: 'none', border: 'none', padding: 0,
           cursor: 'pointer',
-          transition: 'all 220ms ease',
-          display: 'flex', alignItems: 'center', gap: '5px',
+          transition: 'all 250ms ease',
+          display: 'flex', alignItems: 'center', gap: '4px',
         }}>
         Acceso equipo
-        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M7 17L17 7M7 7h10v10"/>
         </svg>
       </button>
