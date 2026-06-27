@@ -144,7 +144,7 @@ function Footer({ navigate }) {
   return (
     <footer style={{ background: 'var(--color-warm-950)', color: 'white', padding: '64px 48px 28px' }}>
       <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '48px', paddingBottom: '40px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '48px', paddingBottom: '32px' }}>
           <div>
             <LPKLogo size={48} />
             <p style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--text-sm)', color: 'rgba(255,255,255,0.35)', lineHeight: 1.8, maxWidth: '280px', marginTop: '20px' }}>
@@ -162,13 +162,29 @@ function Footer({ navigate }) {
           <div>
             <span style={colLabel}>Contacto</span>
             <div style={col}>
-              <div>Puerto Varas, Chile</div>
+              <div>Decher 60, Local N°5</div>
+              <div>Puerto Varas, Los Lagos</div>
               <div>+56 9 2999 3799</div>
               <div>@lapelukeria_pv</div>
             </div>
           </div>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '20px' }}>
+
+        {/* Google Maps */}
+        <div style={{ margin: '32px 0', borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)' }}>
+          <iframe
+            title="La Pelukeria — Mapa"
+            src="https://www.google.com/maps?q=Decher+60,+Puerto+Varas,+Chile&output=embed"
+            width="100%"
+            height="220"
+            style={{ border: 0, display: 'block', filter: 'brightness(0.72) saturate(0.85)' }}
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+          />
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '20px', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
           <div style={{ fontFamily: 'var(--font-body)', fontSize: '9px', color: 'rgba(255,255,255,0.18)', letterSpacing: '0.1em' }}>
             © {new Date().getFullYear()} La Pelukeria · Puerto Varas
           </div>
@@ -182,6 +198,7 @@ function Footer({ navigate }) {
     </footer>
   )
 }
+
 
 // ── Hero ──────────────────────────────────────────────────────────────────────
 function Hero({ navigate }) {
@@ -216,6 +233,7 @@ function Hero({ navigate }) {
       {mounted && (
         <div style={{ position:'absolute', top:'38%', left:0, right:0, height:'1px', background:'linear-gradient(to right, transparent 0%, rgba(255,255,255,.055) 25%, rgba(255,255,255,.055) 75%, transparent 100%)', transformOrigin:'left center', animation:'lpkLineDraw 2s cubic-bezier(.16,1,.3,1) .1s both', pointerEvents:'none' }} />
       )}
+
 
       {/* Hero copy */}
       <div style={{ position:'absolute', bottom:'84px', left:'56px', right:'50%', minWidth:'420px', zIndex:2 }}>
