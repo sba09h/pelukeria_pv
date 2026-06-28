@@ -1,7 +1,8 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { Clock, ArrowRight, ArrowLeft, Star } from 'lucide-react'
 import { MOCK_SERVICES } from '../../lib/mockData'
 import Logo from '../../components/ui/Logo'
+import useSEO from '../../hooks/useSEO'
 
 const CATEGORIES = ['Todos', 'Corte', 'Color', 'Tratamientos', 'Otros']
 
@@ -27,6 +28,11 @@ function formatDuration(min) {
 }
 
 export default function ServiciosPublico() {
+  useSEO({
+    title: 'Servicios · La Pelukeria Puerto Varas · Corte, Balayage, Alisado y más',
+    description: 'Descubre todos nuestros servicios: corte mujer, corte hombre, balayage, tintado, alisado Diamond Rose, hidratación profunda, manicure y peinado de evento en Puerto Varas.',
+    canonical: 'https://lapelukeria.cl/servicios',
+  })
   const [cat, setCat] = useState('Todos')
 
   const filtered = useMemo(() =>
@@ -65,9 +71,9 @@ export default function ServiciosPublico() {
           style={{ backgroundImage: 'radial-gradient(circle, #C8B89A 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
         <div className="relative max-w-2xl mx-auto">
           <p className="text-brand-400 text-xs tracking-[0.3em] uppercase mb-4">Nuestros servicios</p>
-          <h1 className="font-serif text-5xl font-light mb-4">Lo que hacemos</h1>
+          <h1 className="font-serif text-5xl font-light mb-4">Servicios de Peluquería en Puerto Varas</h1>
           <p className="text-dark-400 text-sm leading-relaxed max-w-md mx-auto">
-            Cortes, color, tratamientos y más — aplicados con técnica y pasión en el corazón de Puerto Varas.
+            Corte mujer, corte hombre, balayage, tintado, alisado y tratamientos capilares de alta gama en el corazón de Puerto Varas.
           </p>
           <a href="/agendar"
             className="inline-flex items-center gap-2 mt-8 px-6 py-3 bg-brand-400 text-white rounded-xl text-sm font-medium hover:bg-brand-500 transition-colors">

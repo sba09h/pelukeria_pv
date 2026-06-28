@@ -15,6 +15,7 @@ import {
 } from '../../lib/mockData'
 import { CategoryBadge } from '../../components/ui/Badge'
 import Logo from '../../components/ui/Logo'
+import useSEO from '../../hooks/useSEO'
 
 // ── EmailJS config ────────────────────────────────────────────────────────────
 // Crea cuenta gratis en https://emailjs.com y rellena estas 3 constantes:
@@ -485,6 +486,11 @@ const STEPS = [
 
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export default function Agendar() {
+  useSEO({
+    title: 'Reservar Hora · La Pelukeria Puerto Varas',
+    description: 'Agenda tu cita online en La Pelukeria, Puerto Varas. Elige servicio, profesional y horario disponible. Rápido, fácil y sin llamadas.',
+    canonical: 'https://lapelukeria.cl/agendar',
+  })
   const [step, setStep] = useState(1)
   const [done, setDone] = useState(false)
 

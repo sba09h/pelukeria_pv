@@ -1,7 +1,8 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { ArrowLeft, ArrowRight, X, ChevronLeft, ChevronRight, Instagram } from 'lucide-react'
 import { MOCK_GALLERY } from '../../lib/mockData'
 import Logo from '../../components/ui/Logo'
+import useSEO from '../../hooks/useSEO'
 
 const CATEGORIES = ['Todos', 'Corte', 'Color', 'Tratamientos', 'Otros']
 
@@ -77,6 +78,11 @@ function Lightbox({ photos, index, onClose, onPrev, onNext }) {
 
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export default function GaleriaPublico() {
+  useSEO({
+    title: 'Galería · La Pelukeria Puerto Varas · Cortes, Colores y Tratamientos',
+    description: 'Conoce nuestro trabajo: galería de cortes, balayage, coloraciones y tratamientos realizados en La Pelukeria, Puerto Varas. El resultado habla por sí solo.',
+    canonical: 'https://lapelukeria.cl/galeria',
+  })
   const [cat,      setCat]      = useState('Todos')
   const [lightbox, setLightbox] = useState(null)
 
@@ -110,9 +116,9 @@ export default function GaleriaPublico() {
           style={{ backgroundImage: 'radial-gradient(circle, #C8B89A 1px, transparent 1px)', backgroundSize: '28px 28px' }}/>
         <div className="relative max-w-2xl mx-auto">
           <p className="text-brand-400 text-xs tracking-[0.3em] uppercase mb-4">Portfolio</p>
-          <h1 className="font-serif text-5xl font-light mb-4">Nuestro trabajo</h1>
+          <h1 className="font-serif text-5xl font-light mb-4">Galería de Cortes y Coloraciones en Puerto Varas</h1>
           <p className="text-dark-400 text-sm leading-relaxed max-w-md mx-auto">
-            Cada imagen cuenta una historia de transformación. Aquí encontrarás una muestra de lo que hacemos con amor y técnica.
+            Balayage, tintes, cortes y tratamientos. Cada imagen es una transformación real realizada en La Pelukeria, Puerto Varas.
           </p>
         </div>
       </section>

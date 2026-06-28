@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { MOCK_GALLERY } from '../../lib/mockData'
+import useSEO from '../../hooks/useSEO'
 
 // ── Keyframes injected once ───────────────────────────────────────────────────
 const KEYFRAMES = `
@@ -433,6 +434,11 @@ function Hero({ navigate }) {
       </div>
 
 
+      {/* H1 oculto para crawlers — contenido SEO visible para Google, invisible visualmente */}
+      <h1 style={{ position:'absolute', width:'1px', height:'1px', overflow:'hidden', clip:'rect(0,0,0,0)', whiteSpace:'nowrap', border:0, margin:'-1px', padding:0 }}>
+        La Pelukeria — Peluquería en Puerto Varas · Corte, Balayage, Color y Tratamientos Capilares
+      </h1>
+
       {/* Hero copy */}
       <div style={{ position:'absolute', bottom:'84px', left:'56px', right:'50%', minWidth:'420px', zIndex:2 }}>
         <div style={{ fontFamily:'var(--font-body)', fontSize:'9.6px', fontWeight:500, letterSpacing:'0.35em', textTransform:'uppercase', color:'rgba(255,255,255,.36)', marginBottom:'18px', ...fu(0.28) }}>
@@ -716,6 +722,13 @@ function LoyaltyTeaser({ navigate }) {
 // ── Main Landing Page ─────────────────────────────────────────────────────────
 export default function Landing() {
   const navigate = useNavigate()
+
+  useSEO({
+    title: 'Peluquería en Puerto Varas · La Pelukeria · Corte, Color y Tratamientos',
+    description: 'La Pelukeria — peluquería premium en Puerto Varas, Chile. Especialistas en corte, balayage, tinte, alisado y tratamientos capilares de alta gama. Reserva tu hora online.',
+    canonical: 'https://lapelukeria.cl/',
+    ogImage: 'https://lapelukeria.cl/logo.webp',
+  })
 
   // Inject keyframes once
   useEffect(() => {
