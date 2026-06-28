@@ -133,7 +133,7 @@ export default function Login() {
 
       {/* Right — form */}
       <div className="flex-1 flex items-center justify-center p-8 bg-white">
-        <div className="w-full max-w-sm">
+        <div className="w-full" style={{ maxWidth: '460px' }}>
 
           {/* Mobile wordmark */}
           <div className="mb-10 lg:hidden">
